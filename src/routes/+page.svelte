@@ -1291,7 +1291,7 @@
 	<ul class="nav-links {menuOpen ? 'active' : ''}">
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToHome(); menuOpen = false; }}>Beranda</a></li>
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToAllPeraturan(); menuOpen = false; }}>Peraturan</a></li>
-		<li><a href="#" onclick={(e) => { e.preventDefault(); goToBerita(); }}>Berita</a></li>
+		<li><a href="#" onclick={(e) => { e.preventDefault(); goToAllBerita(); menuOpen = false; }}>Berita</a></li>
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToAboutUs(); menuOpen = false; }}>About Us</a></li>
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToStatusIkm(); menuOpen = false; }}>Cek Status IKM</a></li>
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToKontak(); menuOpen = false; }}>Kontak</a></li>
