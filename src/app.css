@@ -236,7 +236,7 @@ body {
 .cal-day.today { font-weight: 700; border: 1px solid var(--gold-3); color: var(--ink); background: rgba(255, 209, 85, 0.08); }
 .cal-day.has-event { background: var(--gold-grad); color: var(--ink); font-weight: 700; box-shadow: 0 4px 14px rgba(255, 209, 85, 0.35); }
 .cal-day.has-event:hover { background: linear-gradient(135deg, var(--gold-2) 0%, var(--gold-3) 100%); }
-.cal-day.selected { background-color: var(--obsidian-900) !important; color: var(--on-dark) !important; font-weight: 700; box-shadow: 0 4px 16px rgba(10, 10, 12, 0.35); }
+.cal-day.selected { background: var(--obsidian-900) !important; color: var(--on-dark) !important; font-weight: 700; box-shadow: 0 4px 16px rgba(10, 10, 12, 0.35); }
 .calendar-events { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--hairline); }
 .event-item { background: var(--surface-soft); padding: 20px; border-radius: var(--radius-md); margin-bottom: 12px; border-left: 4px solid var(--gold-2); transition: all 0.2s; }
 .event-item:hover { background: #f3f1ea; border-left-color: var(--gold-3); }
