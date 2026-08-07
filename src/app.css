@@ -221,7 +221,6 @@ body {
 /* KALENDER ISS — kartu dengan hari emas     */
 /* ========================================= */
 .iss-container { max-width: 800px; margin: 0 auto; background: var(--canvas); border: 1px solid rgba(255, 209, 85, 0.25); border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; }
-.iss-container::before { content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, var(--gold-2), transparent); }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--hairline); }
 .calendar-title { font-family: var(--font-heading); font-size: 20px; font-weight: 700; text-transform: uppercase; color: var(--obsidian-900); }
 .calendar-nav { display: flex; gap: 8px; align-items: center; }
