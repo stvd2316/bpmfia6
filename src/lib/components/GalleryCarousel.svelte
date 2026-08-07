@@ -108,12 +108,6 @@
 		{#each items as item (item.id)}
 			<div class="gal-card" role="group" aria-roledescription="slide" aria-label={item.title}>
 				<img src={item.image} alt={item.title} draggable={false} />
-				<div class="gal-overlay"></div>
-				<div class="gal-body">
-					<span class="gal-tag">Divisi</span>
-					<div class="gal-title">{item.title}</div>
-					{#if item.description}<div class="gal-desc">{item.description}</div>{/if}
-				</div>
 			</div>
 		{/each}
 	</div>
@@ -236,47 +230,6 @@
 	}
 	.gal-card:hover img {
 		transform: scale(1.05);
-	}
-	.gal-overlay {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(180deg, rgba(5, 5, 8, 0) 35%, rgba(5, 5, 8, 0.55) 62%, rgba(5, 5, 8, 0.92) 100%);
-	}
-	.gal-body {
-		position: absolute;
-		inset-inline: 0;
-		bottom: 0;
-		padding: 20px;
-		text-align: left;
-	}
-	.gal-tag {
-		display: inline-block;
-		background: var(--gold-grad);
-		color: var(--ink);
-		font-family: var(--font-heading);
-		font-size: 10px;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 1px;
-		padding: 3px 10px;
-		border-radius: 6px;
-		margin-bottom: 8px;
-	}
-	.gal-title {
-		font-family: var(--font-heading);
-		font-size: 20px;
-		font-weight: 700;
-		color: var(--on-dark);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		line-height: 1.3;
-	}
-	.gal-desc {
-		font-family: var(--font-body);
-		font-size: 13px;
-		color: var(--on-dark-mute);
-		margin-top: 6px;
-		line-height: 1.5;
 	}
 	.gal-dots {
 		display: flex;
