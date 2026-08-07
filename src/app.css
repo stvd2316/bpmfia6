@@ -72,7 +72,9 @@ body {
   /* Obsidian Gold 2.0 — aksen premium (tanpa animasi dekoratif berjalan) */
   --gold-grad-strong: linear-gradient(135deg, #ffe9a8 0%, #ffd155 35%, #f0a500 100%);
   --text-grad-hero: linear-gradient(180deg, #ffffff 30%, #ffedb8 76%, #ffd155 100%);
-  --text-grad-gold-dark: linear-gradient(180deg, #6b4a00 0%, #b8860b 45%, #f0a500 100%);
+  /* Emas gemilang untuk judul section & bulan kalender: amber hangat (kontras
+     di atas putih, mudah dibaca) → emas cerah (berkilau, tidak silau) */
+  --text-grad-gold: linear-gradient(180deg, #c98a04 0%, #eab308 45%, #ffd76a 100%);
   --btn-gold-border: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -2px 0 rgba(176, 106, 0, 0.35);
   --gold-ring-soft: 0 0 0 1px rgba(255, 209, 85, 0.22);
 }
@@ -180,7 +182,7 @@ body {
 .section-header { text-align: center; margin-bottom: 48px; }
 .section-header h2 { font-family: var(--font-heading); font-size: 36px; font-weight: 700; color: var(--body); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; position: relative; display: inline-block; }
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .section-header h2 { background: var(--text-grad-gold-dark); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .section-header h2 { background: var(--text-grad-gold); -webkit-background-clip: text; background-clip: text; color: transparent; }
 }
 .section-header p { font-family: var(--font-body); color: var(--mute); font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 100%; margin: 0 auto; }
@@ -240,7 +242,7 @@ body {
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid rgba(255, 209, 85, 0.25); }
 .calendar-title { font-family: var(--font-heading); font-size: 20px; font-weight: 700; text-transform: uppercase; color: var(--obsidian-900); }
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .calendar-title { background: var(--text-grad-gold-dark); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .calendar-title { background: var(--text-grad-gold); -webkit-background-clip: text; background-clip: text; color: transparent; }
 }
 .calendar-nav { display: flex; gap: 8px; align-items: center; }
 .cal-nav-btn { background: var(--surface-soft); border: 1px solid var(--hairline); width: 32px; height: 32px; border-radius: var(--radius-sm); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
