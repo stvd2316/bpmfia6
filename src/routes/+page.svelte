@@ -1305,7 +1305,7 @@
 
 <!-- ============ HALAMAN UTAMA ============ -->
 {#if !showAllPeraturan && !selectedPeraturan && !showAboutUs && !showStatusIkm && !showAllBerita && !selectedBerita}
-	<section class="hero" id="beranda" style="background-color: var(--surface-dark)">
+	<section class="hero" id="beranda" style="background-image: url('/assets/gedungfia.webp'); background-color: var(--surface-dark)">
 		<div class="hero-content">
 			<div class="hero-badge">SELAMAT DATANG</div>
 			<h1>Badan Perwakilan Mahasiswa FIA UI</h1>
