@@ -1361,7 +1361,7 @@
 
 	<section class="section" id="iss">
 		<div class="section-header"><h2>ISS (Integrated Scheduling System)</h2><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh BPM FIA UI</p></div>
-		<MovingBorder borderRadius="24px" rx="24" ry="24" duration={6000} class="iss-mb">
+		<MovingBorder borderRadius="24px" rx="24" ry="24" duration="6s" class="iss-mb">
 		<div class="iss-container">
 			<div class="calendar-header"><div class="calendar-title">{currentDate ? `${monthsID[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Memuat Kalender...'}</div><div class="calendar-nav"><button type="button" class="cal-nav-btn" onclick={handlePrevMonth}>&lt;</button><button type="button" class="cal-nav-btn" onclick={handleNextMonth}>&gt;</button></div></div>
 			<div class="calendar-grid">

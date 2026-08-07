@@ -1,65 +1,56 @@
 <script lang="ts">
-	// MovingBorder — border emas "berjalan" mengelilingi konten (port Svelte murni
-	// dari komponen React framer-motion "moving-border", tanpa dependency baru).
-	// Sebuah "bola cahaya" emas bergerak mengikuti path SVG border secara kontinu
-	// via requestAnimationFrame + getPointAtLength (ringan: hanya transform 2D).
-	import { onMount } from 'svelte';
-
+	// MovingBorder — garis emas tipis yang "berjalan" mengelilingi border luar
+	// konten (versi Svelte murni dari komponen React framer-motion
+	// "moving-border"). Tanpa JS runtime: animasi murni CSS
+	// (stroke-dashoffset pada SVG rect) — sangat ringan di HP.
 	let {
 		children,
 		borderRadius = '24px',
 		rx = '24',
 		ry = '24',
-		duration = 6000,
+		duration = '6s',
 		class: className = ''
 	}: {
 		children: import('svelte').Snippet;
 		borderRadius?: string;
 		rx?: string;
 		ry?: string;
-		duration?: number;
+		duration?: string;
 		class?: string;
 	} = $props();
-
-	let pathRef = $state<SVGRectElement | null>(null);
-	let ballX = $state(0);
-	let ballY = $state(0);
-
-	onMount(() => {
-		// Hormati preferensi animasi minim: tampilkan border statis saja
-		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-		const start = performance.now();
-		let raf = 0;
-		const tick = (time: number) => {
-			const path = pathRef;
-			if (path) {
-				const length = path.getTotalLength();
-				if (length) {
-					const pxPerMs = length / duration;
-					const progress = ((time - start) * pxPerMs) % length;
-					const pt = path.getPointAtLength(progress);
-					ballX = pt.x;
-					ballY = pt.y;
-				}
-			}
-			raf = requestAnimationFrame(tick);
-		};
-		raf = requestAnimationFrame(tick);
-		return () => cancelAnimationFrame(raf);
-	});
 </script>
 
 <div class="mb-wrap {className}" style="border-radius: {borderRadius}">
-	<div class="mb-inner" style="border-radius: calc({borderRadius} * 0.96)">
-		<svg class="mb-svg" width="100%" height="100%" preserveAspectRatio="none" aria-hidden="true">
-			<rect fill="none" width="100%" height="100%" rx={rx} ry={ry} bind:this={pathRef} />
-		</svg>
-		<div
-			class="mb-ball"
-			style="transform: translate({ballX}px, {ballY}px) translate(-50%, -50%);"
-		></div>
-	</div>
+	<svg
+		class="mb-svg"
+		width="100%"
+		height="100%"
+		preserveAspectRatio="none"
+		aria-hidden="true"
+	>
+		<defs>
+			<linearGradient id="mb-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+				<stop offset="0%" stop-color="#ffe08a" />
+				<stop offset="45%" stop-color="#ffd155" />
+				<stop offset="100%" stop-color="#f0a500" />
+			</linearGradient>
+		</defs>
+		<!-- Segmen garis emas yang berjalan: dasharray = panjang segmen + gap,
+		     dashoffset dianimasikan CSS sehingga segmen mengitari border. -->
+		<rect
+			class="mb-path"
+			fill="none"
+			stroke="url(#mb-gold)"
+			stroke-width="3"
+			stroke-linecap="round"
+			stroke-dasharray="110 600"
+			rx={rx}
+			ry={ry}
+			width="100%"
+			height="100%"
+			style="animation-duration: {duration}"
+		/>
+	</svg>
 	<div class="mb-content" style="border-radius: calc({borderRadius} * 0.96)">
 		{@render children()}
 	</div>
@@ -68,48 +59,41 @@
 <style>
 	.mb-wrap {
 		position: relative;
-		padding: 1.5px;
+		/* Padding = ketebalan garis: stroke 3px pas berada di area padding,
+		   sehingga garis tampil di border LUAR konten (tidak menutupi isi). */
+		padding: 3px;
 		overflow: hidden;
-	}
-	.mb-inner {
-		position: absolute;
-		inset: 0;
-		pointer-events: none;
-		/* Bola harus DI ATAS konten (z-index 2 > 1): konten kalender opaque
-		   (putih) akan menutupi bola jika bola di belakang — strip padding 1.5px
-		   terlalu tipis untuk terlihat. Glow transparan tidak mengganggu baca. */
-		z-index: 2;
 	}
 	.mb-svg {
 		position: absolute;
 		inset: 0;
 		width: 100%;
 		height: 100%;
-	}
-	/* Bola cahaya emas — radial gradient transparan sehingga hanya "menyala"
-	   saat melewati tepi konten; blend mode screen membuatnya menyatu dengan
-	   latar apa pun. */
-	.mb-ball {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 72px;
-		height: 72px;
-		border-radius: 50%;
-		background: radial-gradient(
-			circle,
-			rgba(255, 232, 168, 0.95) 0%,
-			rgba(255, 209, 85, 0.55) 30%,
-			rgba(240, 165, 0, 0.18) 55%,
-			transparent 72%
-		);
-		mix-blend-mode: screen;
 		pointer-events: none;
-		will-change: transform;
+		z-index: 2;
+	}
+	.mb-path {
+		animation-name: mbDash;
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+	}
+	@keyframes mbDash {
+		to {
+			/* Periode dash (110 + 600) = 710 → offset -710 = satu putaran penuh */
+			stroke-dashoffset: -710;
+		}
 	}
 	.mb-content {
 		position: relative;
 		height: 100%;
 		z-index: 1;
+	}
+
+	/* Hormati preferensi animasi minim: garis emas penuh statis (tetap cantik) */
+	@media (prefers-reduced-motion: reduce) {
+		.mb-path {
+			animation: none;
+			stroke-dasharray: none;
+		}
 	}
 </style>
