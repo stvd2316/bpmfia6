@@ -1320,7 +1320,7 @@
 	</div>
 	<section class="section" id="peraturan">
 		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
-			<div style="text-align: left"><h2>Peraturan Terbaru</h2><span class="hdr-line"></span><p>Daftar peraturan yang dikeluarkan oleh BPM FIA UI</p></div>
+			<div style="text-align: left"><h2>Peraturan Terbaru</h2><p>Daftar peraturan yang dikeluarkan oleh BPM FIA UI</p></div>
 			{#if isAdmin}<button type="button" class="btn-admin-action" onclick={openAddForm} title="Tambah Peraturan">+</button>{/if}
 		</div>
 		<div class="cards-grid">
@@ -1340,7 +1340,7 @@
 
 	<section class="section" id="berita" style="background-color: var(--surface-soft)">
 		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
-			<div style="text-align: left"><h2>Berita Terbaru</h2><span class="hdr-line"></span><p>Informasi dan kabar terkini</p></div>
+			<div style="text-align: left"><h2>Berita Terbaru</h2><p>Informasi dan kabar terkini</p></div>
 			{#if isAdmin}<button type="button" class="btn-admin-action" onclick={openAddBeritaForm} title="Tambah Berita">+</button>{/if}
 		</div>
 		<div class="cards-grid">
@@ -1359,7 +1359,7 @@
 	</section>
 
 	<section class="section" id="iss">
-		<div class="section-header"><h2>ISS (Integrated Scheduling System)</h2><span class="hdr-line"></span><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh BPM FIA UI</p></div>
+		<div class="section-header"><h2>ISS (Integrated Scheduling System)</h2><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh BPM FIA UI</p></div>
 		<div class="iss-container">
 			<div class="calendar-header"><div class="calendar-title">{currentDate ? `${monthsID[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Memuat Kalender...'}</div><div class="calendar-nav"><button type="button" class="cal-nav-btn" onclick={handlePrevMonth}>&lt;</button><button type="button" class="cal-nav-btn" onclick={handleNextMonth}>&gt;</button></div></div>
 			<div class="calendar-grid">
@@ -1430,7 +1430,7 @@
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goBack}>← Kembali ke Beranda</button>
 		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
-			<div style="text-align: left"><h2>Semua Berita</h2><span class="hdr-line"></span><p>Daftar lengkap kabar terkini</p></div>
+			<div style="text-align: left"><h2>Semua Berita</h2><p>Daftar lengkap kabar terkini</p></div>
 			{#if isAdmin}<button type="button" class="btn-admin-action" onclick={openAddBeritaForm} title="Tambah Berita">+</button>{/if}
 		</div>
 		{#if loadingBerita}
@@ -1491,7 +1491,7 @@
 {:else if showStatusIkm}
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goBack}>← Kembali ke Beranda</button>
-		<div class="section-header"><h2>Cek Status IKM</h2><span class="hdr-line"></span><p>Masukkan nama mahasiswa untuk mengecek status IKM.</p></div>
+		<div class="section-header"><h2>Cek Status IKM</h2><p>Masukkan nama mahasiswa untuk mengecek status IKM.</p></div>
 		<div style="max-width: 800px; margin: 0 auto; text-align: center"><input type="text" class="search-input" placeholder="Cari nama mahasiswa..." value={searchIkm} oninput={(e) => (searchIkm = val(e))} /></div>
 		<div class="status-table-container"><table class="status-table"><thead><tr><th>Nama</th><th>Jurusan</th><th>Nilai</th><th>Status</th>{#if isAdmin}<th>Aksi</th>{/if}</tr></thead><tbody>
 			{#if searchIkm.trim() === ''}
@@ -1517,7 +1517,7 @@
 {:else if showAboutUs}
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goBack}>← Kembali ke Beranda</button>
-		<div class="section-header"><h2>About Us</h2><span class="hdr-line"></span><p>Kepengurusan Badan Perwakilan Mahasiswa FIA UI</p></div>
+		<div class="section-header"><h2>About Us</h2><p>Kepengurusan Badan Perwakilan Mahasiswa FIA UI</p></div>
 		<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 700px; padding: 40px 0">
 			<p style="font-style: italic; margin-bottom: 32px; color: var(--mute); font-family: var(--font-body); font-size: 16px; text-align: center">Swipe ke kanan atau kiri untuk melihat foto setiap divisi/komisi</p>
 			<GalleryCarousel
@@ -1557,7 +1557,7 @@
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goToHome}>← Kembali ke Beranda</button>
 		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
-			<div style="text-align: left"><h2>Semua Peraturan</h2><span class="hdr-line"></span><p>Daftar lengkap peraturan yang dikeluarkan oleh BPM FIA UI</p></div>
+			<div style="text-align: left"><h2>Semua Peraturan</h2><p>Daftar lengkap peraturan yang dikeluarkan oleh BPM FIA UI</p></div>
 			{#if isAdmin}<button type="button" class="btn-admin-action" onclick={openAddForm} title="Tambah Peraturan">+</button>{/if}
 		</div>
 		<div class="filter-grid">
