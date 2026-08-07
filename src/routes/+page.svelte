@@ -1314,11 +1314,13 @@
 			<button type="button" onclick={goToAllPeraturan} class="btn-primary">Jelajahi Peraturan</button>
 		</div>
 	</section>
-	<div class="stats-section" style="margin-top: -60px">
+	<MovingBorder borderRadius="24px" rx="24" ry="24" duration="3s" class="stats-mb">
+	<div class="stats-section">
 		<div class="stat-item"><div class="stat-number">{stats.total}</div><div class="stat-label">Dokumen</div></div>
 		<div class="stat-item"><div class="stat-number">{stats.berlaku}</div><div class="stat-label">Berlaku</div></div>
 		<div class="stat-item"><div class="stat-number">{stats.dicabut}</div><div class="stat-label">Dicabut</div></div>
 	</div>
+	</MovingBorder>
 	<section class="section" id="peraturan">
 		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
 			<div style="text-align: left"><h2>Peraturan Terbaru</h2><p>Daftar peraturan yang dikeluarkan oleh BPM FIA UI</p></div>
