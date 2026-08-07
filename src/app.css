@@ -168,7 +168,13 @@ body {
 .section { padding: 64px 5%; background: transparent; }
 .section-header { text-align: center; margin-bottom: 48px; }
 .section-header h2 { font-family: var(--font-heading); font-size: 36px; font-weight: 700; color: var(--ink); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; position: relative; display: inline-block; }
-.section-header h2::after { content: ''; display: block; width: 72px; height: 4px; margin: 14px auto 0; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--gold-2), transparent); }
+.section-header h2::after { content: ''; display: block; width: 72px; height: 4px; margin: 14px auto 0; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--gold-2), transparent); animation: hdrBounce 2.4s ease-in-out infinite alternate; }
+/* Garis emas bawah header "memantul" halus dari kiri ke kanan (transform-only,
+   ringan di HP). Gerakan bolak-balik via alternate + ease-in-out. */
+@keyframes hdrBounce {
+  from { transform: translateX(-22px); }
+  to { transform: translateX(22px); }
+}
 .section-header p { font-family: var(--font-body); color: var(--mute); font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 100%; margin: 0 auto; }
 .card { background: var(--canvas); overflow: hidden; border: 1px solid rgba(10, 10, 12, 0.08); border-radius: var(--radius-lg); transition: all 0.3s ease; display: flex; flex-direction: column; position: relative; box-shadow: var(--card-shadow); animation: cardFade 0.55s ease both; }
@@ -432,5 +438,6 @@ html, body { overflow-x: hidden; }
 /* Hormati pengguna yang meminta animasi minim */
 @media (prefers-reduced-motion: reduce) {
   .hero-content, .card { animation: none !important; }
+  .section-header h2::after { animation: none !important; }
   * { transition-duration: 0.01ms !important; }
 }
