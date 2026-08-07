@@ -76,7 +76,7 @@
 			bind:this={pathRef}
 			fill="none"
 			stroke="url(#mb-gold)"
-			stroke-width="3"
+			stroke-width="4"
 			stroke-linecap="round"
 			stroke-dasharray="110 600"
 			rx={rx}
@@ -94,9 +94,9 @@
 <style>
 	.mb-wrap {
 		position: relative;
-		/* Padding = ketebalan garis: stroke 3px pas berada di area padding,
+		/* Padding = ketebalan garis: stroke 4px pas berada di area padding,
 		   sehingga garis tampil di border LUAR konten (tidak menutupi isi). */
-		padding: 3px;
+		padding: 4px;
 		overflow: hidden;
 	}
 	.mb-svg {
