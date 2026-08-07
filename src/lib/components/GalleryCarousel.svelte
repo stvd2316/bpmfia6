@@ -232,6 +232,9 @@
 	.gal-card:hover img {
 		transform: scale(1.05);
 	}
+	.gal-card:hover {
+		box-shadow: 0 18px 44px rgba(10, 10, 12, 0.18), 0 0 0 1px rgba(255, 209, 85, 0.5);
+	}
 	.gal-dots {
 		display: flex;
 		justify-content: center;
