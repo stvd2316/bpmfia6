@@ -1320,7 +1320,7 @@
 	</div>
 	<section class="section" id="peraturan">
 		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
-			<div style="text-align: left"><h2>Peraturan Terbaru</h2><p>Daftar peraturan yang dikeluarkan oleh BPM FIA UI</p></div>
+			<div style="text-align: left"><h2>Peraturan</h2><p>Daftar peraturan yang dikeluarkan oleh BPM FIA UI</p></div>
 			{#if isAdmin}<button type="button" class="btn-admin-action" onclick={openAddForm} title="Tambah Peraturan">+</button>{/if}
 		</div>
 		<div class="cards-grid">
@@ -1340,7 +1340,7 @@
 
 	<section class="section" id="berita" style="background-color: var(--surface-soft)">
 		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
-			<div style="text-align: left"><h2>Berita Terbaru</h2><p>Informasi dan kabar terkini</p></div>
+			<div style="text-align: left"><h2>Berita</h2><p>Informasi dan kabar terkini</p></div>
 			{#if isAdmin}<button type="button" class="btn-admin-action" onclick={openAddBeritaForm} title="Tambah Berita">+</button>{/if}
 		</div>
 		<div class="cards-grid">
@@ -1359,7 +1359,7 @@
 	</section>
 
 	<section class="section" id="iss">
-		<div class="section-header"><h2>ISS (Integrated Scheduling System)</h2><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh BPM FIA UI</p></div>
+		<div class="section-header"><h2>ISS (Integrated Scheduling System)</h2><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh ORMAWA FIA UI</p></div>
 		<div class="iss-container">
 			<div class="calendar-header"><div class="calendar-title">{currentDate ? `${monthsID[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Memuat Kalender...'}</div><div class="calendar-nav"><button type="button" class="cal-nav-btn" onclick={handlePrevMonth}>&lt;</button><button type="button" class="cal-nav-btn" onclick={handleNextMonth}>&gt;</button></div></div>
 			<div class="calendar-grid">
