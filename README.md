@@ -22,23 +22,38 @@ Semua komponen UI, teks, class CSS, perilaku navigasi hash (`#peraturan`, `#pera
 npm install        # sekali
 npm run dev        # dev server → http://localhost:3000 (host: true → bisa diakses dari HP di LAN)
 npm run check      # svelte-check (type checking)
-npm run build      # build produksi → ./build (adapter-node)
-npm run preview    # preview build produksi
+npm run build      # build produksi → .vercel/output (adapter-vercel)
 ```
 
-### Build produksi (deploy)
+### Deploy di Vercel (default)
+
+Build menggunakan **@sveltejs/adapter-vercel** — hasilnya otomatis dikenali Vercel
+(serverless function untuk semua `/api/*` + static assets via CDN):
+
+1. Push repo ke GitHub, import di Vercel (framework terdeteksi otomatis: SvelteKit).
+2. Set environment variables di **Project → Settings → Environment Variables**:
+   `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`,
+   `R2_PUBLIC_URL`, `ADMIN_USER`, `ADMIN_PASS`.
+3. Deploy. Build memakan ~4 detik dan output hanya ~100KB gzip client.
+
+> ⚠️ Limit body Vercel serverless = 4,5MB per request. Upload PDF peraturan (maks 500KB) aman;
+> upload multi-file ISS/Berita (10 file × 2MB) bisa gagal 413 jika total > 4,5MB — sama seperti
+> batasan versi Next.js di Vercel. Untuk upload besar, gunakan hosting Node/VPS (lihat di bawah).
+
+### Deploy di Node/VPS (opsional)
 
 ```bash
+npm i -D @sveltejs/adapter-node
+# svelte.config.js → import adapter from '@sveltejs/adapter-node'; adapter: adapter()
 npm run build
 PORT=3000 node build/index.js
 ```
 
-Variabel environment dibaca dari `.env.local` di dev; di produksi set sebagai environment variable
-(di Vercel/Railway/Render/dll): `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
-`R2_BUCKET_NAME`, `R2_PUBLIC_URL`, `ADMIN_USER`, `ADMIN_PASS`.
+### Catatan warning a11y
 
-> Catatan: di dev, Vite otomatis memuat `.env.local`. Untuk menjalankan build produksi di Windows
-> (bash), ekspor dulu isi `.env.local`: `export $(grep -v '^#' .env.local | xargs)` atau set manual.
+`compilerOptions.warningFilter` di `svelte.config.js` menonaktifkan warning aksesibilitas
+Svelte (`a11y_*`) karena struktur HTML sengaja dipertahankan 1:1 dari versi Next.js —
+warning tersebut bukan error dan tidak memengaruhi build.
 
 ## Struktur
 
@@ -75,14 +90,3 @@ static/
 - Admin: login via `/api/admin-login`, CRUD peraturan/berita/acara, edit nilai IKM
 - About Us: tumpukan kartu foto yang bisa di-swipe (pointer events, rAF)
 - Navigasi hash manual via History API (back/forward didukung penuh)
-
-## Deploy di Vercel (opsional)
-
-Jika ingin deploy di Vercel, ganti adapter:
-
-```bash
-npm i -D @sveltejs/adapter-vercel
-# svelte.config.js → import adapter from '@sveltejs/adapter-vercel'; adapter: adapter()
-```
-
-Lalu set environment variables di dashboard Vercel. Untuk Node/VPS gunakan adapter-node (default).
