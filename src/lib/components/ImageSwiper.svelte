@@ -17,8 +17,17 @@
 
 	onMount(() => {
 		const hR = () => {
-			if (window.innerWidth < 600) dimensions = { width: 320, height: 427 };
-			else dimensions = { width: 450, height: 600 };
+			// clientWidth = lebar layout viewport sebenarnya (bukan innerWidth yang
+			// bisa beda di emulasi mobile/scrollbar). Kartu selalu muat di layar:
+			// container = w + 32px ≤ area konten (vw - padding 2×16px),
+			// kartu maks 320px (mobile) / 450px (desktop).
+			const vw = document.documentElement.clientWidth;
+			if (vw < 600) {
+				const w = Math.min(320, Math.max(200, vw - 64));
+				dimensions = { width: w, height: Math.round(w * (427 / 320)) };
+			} else {
+				dimensions = { width: 450, height: 600 };
+			}
 		};
 		hR();
 		window.addEventListener('resize', hR);
@@ -155,7 +164,7 @@
 <div
 	class="card-stack-container"
 	bind:this={cardStackRef}
-	style="width: {cW + 32}px; height: {cH + 32}px; position: relative; display: grid; placeContent: center; userSelect: none; transformStyle: preserve-3d; perspective: 700px; margin: 0 auto; touchAction: pan-y"
+	style="width: {cW + 32}px; max-width: 100%; height: {cH + 32}px; position: relative; display: grid; placeContent: center; userSelect: none; transformStyle: preserve-3d; perspective: 700px; margin: 0 auto; touchAction: pan-y"
 >
 	{#each cardOrder as oI, dI (oI)}
 		<div
