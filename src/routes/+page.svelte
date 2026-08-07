@@ -2,8 +2,8 @@
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase';
 	import LocalImagePreview from '$lib/components/LocalImagePreview.svelte';
-	import ImageSwiper from '$lib/components/ImageSwiper.svelte';
 	import TextWithLinks from '$lib/components/TextWithLinks.svelte';
+	import GalleryCarousel from '$lib/components/GalleryCarousel.svelte';
 
 	// ================= STATE (port 1:1 dari useState page.tsx) =================
 
@@ -1520,7 +1520,15 @@
 		<div class="section-header"><h2>About Us</h2><span class="hdr-line"></span><p>Kepengurusan Badan Perwakilan Mahasiswa FIA UI</p></div>
 		<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 700px; padding: 40px 0">
 			<p style="font-style: italic; margin-bottom: 32px; color: var(--mute); font-family: var(--font-body); font-size: 16px; text-align: center">Swipe ke kanan atau kiri untuk melihat foto setiap divisi/komisi</p>
-			<ImageSwiper images={['/assets/pi.webp', '/assets/kominfo.webp', '/assets/kokum.webp']} />
+			<GalleryCarousel
+				title="Divisi & Komisi"
+				description="Galeri foto divisi dan komisi BPM FIA UI"
+				items={[
+					{ id: 'pi', title: 'PI', image: '/assets/pi.webp' },
+					{ id: 'kominfo', title: 'KOMINFO', image: '/assets/kominfo.webp' },
+					{ id: 'kokum', title: 'KOKUM', image: '/assets/kokum.webp' }
+				]}
+			/>
 		</div>
 	</section></div>
 {:else if selectedPeraturan}
