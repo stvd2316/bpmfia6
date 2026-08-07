@@ -31,6 +31,18 @@ body { font-family: var(--font-body); background-color: var(--canvas); color: va
 html { height: 100%; }
 body { min-height: 100%; display: flex; flex-direction: column; }
 
+/* Cegah iOS Safari/WKWebView membesarkan teks otomatis (text-size-adjust / text
+   inflation) — penyebab teks super jumbo & elemen terpotong di kanan pada iPhone,
+   yang tidak terjadi di Android. Nilai 100% = teks tetap pada ukuran CSS-nya. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 .navbar { position: fixed; top: 0; left: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 32px; z-index: 1000; transition: height 0.3s, background 0.3s, box-shadow 0.3s; background: transparent; backdrop-filter: blur(10px); box-shadow: none; height: 64px; border-bottom: 1px solid transparent; }
 .navbar.scrolled { background: rgba(0,0,0,0.85); box-shadow: 0 4px 30px rgba(0,0,0,0.2); height: 56px; border-bottom: 1px solid var(--hairline-strong); }
 .nav-logo { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-right: auto; }
