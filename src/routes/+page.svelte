@@ -4,7 +4,6 @@
 	import LocalImagePreview from '$lib/components/LocalImagePreview.svelte';
 	import ImageSwiper from '$lib/components/ImageSwiper.svelte';
 	import TextWithLinks from '$lib/components/TextWithLinks.svelte';
-	import MovingBorder from '$lib/components/MovingBorder.svelte';
 
 	// ================= STATE (port 1:1 dari useState page.tsx) =================
 
@@ -1314,13 +1313,11 @@
 			<button type="button" onclick={goToAllPeraturan} class="btn-primary">Jelajahi Peraturan</button>
 		</div>
 	</section>
-	<MovingBorder borderRadius="24px" rx="24" ry="24" duration="3s" class="stats-mb">
-	<div class="stats-section">
+	<div class="stats-section" style="margin-top: -60px">
 		<div class="stat-item"><div class="stat-number">{stats.total}</div><div class="stat-label">Dokumen</div></div>
 		<div class="stat-item"><div class="stat-number">{stats.berlaku}</div><div class="stat-label">Berlaku</div></div>
 		<div class="stat-item"><div class="stat-number">{stats.dicabut}</div><div class="stat-label">Dicabut</div></div>
 	</div>
-	</MovingBorder>
 	<section class="section" id="peraturan">
 		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
 			<div style="text-align: left"><h2>Peraturan Terbaru</h2><span class="hdr-line"></span><p>Daftar peraturan yang dikeluarkan oleh BPM FIA UI</p></div>
@@ -1363,7 +1360,6 @@
 
 	<section class="section" id="iss">
 		<div class="section-header"><h2>ISS (Integrated Scheduling System)</h2><span class="hdr-line"></span><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh BPM FIA UI</p></div>
-		<MovingBorder borderRadius="24px" rx="24" ry="24" duration="3s" class="iss-mb">
 		<div class="iss-container">
 			<div class="calendar-header"><div class="calendar-title">{currentDate ? `${monthsID[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Memuat Kalender...'}</div><div class="calendar-nav"><button type="button" class="cal-nav-btn" onclick={handlePrevMonth}>&lt;</button><button type="button" class="cal-nav-btn" onclick={handleNextMonth}>&gt;</button></div></div>
 			<div class="calendar-grid">
@@ -1429,7 +1425,6 @@
 				{/if}
 			</div>
 		</div>
-		</MovingBorder>
 	</section>
 {:else if showAllBerita}
 	<div class="page-peraturan-container"><section class="section">
