@@ -147,18 +147,18 @@ body {
 /* ========================================= */
 .hero { position: relative; height: 100vh; min-height: 600px; display: flex; align-items: center; justify-content: flex-start; text-align: left; background-size: cover; background-position: center center; background-repeat: no-repeat; }
 .hero::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background:
-  radial-gradient(760px 380px at 12% 88%, rgba(255, 209, 85, 0.22), transparent 62%),
-  radial-gradient(560px 300px at 88% 10%, rgba(255, 209, 85, 0.1), transparent 60%),
-  linear-gradient(100deg, rgba(4, 4, 7, 0.96) 0%, rgba(4, 4, 7, 0.78) 45%, rgba(4, 4, 7, 0.4) 100%);
+  radial-gradient(760px 380px at 12% 88%, rgba(255, 209, 85, 0.18), transparent 62%),
+  radial-gradient(560px 300px at 88% 10%, rgba(255, 209, 85, 0.08), transparent 60%),
+  linear-gradient(100deg, rgba(4, 4, 7, 0.66) 0%, rgba(4, 4, 7, 0.4) 45%, rgba(4, 4, 7, 0.08) 100%);
   pointer-events: none; }
 .hero-content { position: relative; z-index: 2; color: var(--on-dark); padding: 0 10%; max-width: 800px; animation: heroFade 0.9s ease both; }
 @keyframes heroFade { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 .hero-badge { display: inline-block; background: var(--gold-grad-strong); color: var(--ink); padding: 7px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; margin-bottom: 24px; text-transform: uppercase; font-family: var(--font-heading); letter-spacing: 1.5px; box-shadow: 0 6px 24px rgba(255, 209, 85, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 0 rgba(176, 106, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.4); }
-.hero h1 { font-family: var(--font-heading); font-size: 48px; font-weight: 700; margin-bottom: 20px; line-height: 1.25; text-transform: uppercase; color: var(--on-dark); }
+.hero h1 { font-family: var(--font-heading); font-size: 48px; font-weight: 700; margin-bottom: 20px; line-height: 1.25; text-transform: uppercase; color: var(--on-dark); text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45); }
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
   .hero h1 { background: var(--text-grad-hero); -webkit-background-clip: text; background-clip: text; color: transparent; }
 }
-.hero p { font-family: var(--font-body); font-size: 22px; font-weight: 400; margin-bottom: 40px; color: rgba(255, 255, 255, 0.88); line-height: 1.75; }
+.hero p { font-family: var(--font-body); font-size: 22px; font-weight: 400; margin-bottom: 40px; color: rgba(255, 255, 255, 0.92); line-height: 1.75; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4); }
 .btn-primary { display: inline-flex; background: var(--gold-grad-strong); color: var(--ink); padding: 11px 24px; text-decoration: none; font-weight: 700; border-radius: var(--radius-md); border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer; font-family: var(--font-heading); font-size: 16px; transition: all 0.25s; text-transform: uppercase; height: 44px; align-items: center; justify-content: center; box-shadow: 0 8px 26px rgba(255, 209, 85, 0.4), var(--btn-gold-border); letter-spacing: 0.5px; }
 .btn-primary:hover { background: linear-gradient(135deg, var(--gold-2) 0%, var(--gold-3) 100%); transform: translateY(-2px); box-shadow: 0 14px 38px rgba(255, 209, 85, 0.55), var(--btn-gold-border); }
 .btn-primary:active { transform: translateY(0); }
