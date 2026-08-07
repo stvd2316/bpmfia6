@@ -362,6 +362,11 @@ body {
 .social-links a:hover { background: var(--gold-grad); color: var(--ink); border-color: var(--gold-3); box-shadow: 0 6px 18px rgba(255, 209, 85, 0.35); transform: translateY(-2px); }
 .footer-bottom { font-family: var(--font-heading); text-align: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 10px; color: var(--gold-3); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
 
+/* Wrapper moving-border kalender ISS: lebar mengikuti .iss-container (max 800px)
+   dan border asli dibuat sangat tipis agar bola emas yang berjalan lebih menonjol */
+.iss-mb { max-width: 800px; margin: 0 auto; }
+.iss-mb .iss-container { max-width: 100%; margin: 0; border-color: rgba(255, 209, 85, 0.18); }
+
 /* ========================================= */
 /* RESPONSIVE — sama persis dengan versi lama */
 /* (termasuk pengaman iPhone desktop-mode)    */

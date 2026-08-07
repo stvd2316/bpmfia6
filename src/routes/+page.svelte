@@ -4,6 +4,7 @@
 	import LocalImagePreview from '$lib/components/LocalImagePreview.svelte';
 	import ImageSwiper from '$lib/components/ImageSwiper.svelte';
 	import TextWithLinks from '$lib/components/TextWithLinks.svelte';
+	import MovingBorder from '$lib/components/MovingBorder.svelte';
 
 	// ================= STATE (port 1:1 dari useState page.tsx) =================
 
@@ -1360,6 +1361,7 @@
 
 	<section class="section" id="iss">
 		<div class="section-header"><h2>ISS (Integrated Scheduling System)</h2><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh BPM FIA UI</p></div>
+		<MovingBorder borderRadius="24px" rx="24" ry="24" duration={6000} class="iss-mb">
 		<div class="iss-container">
 			<div class="calendar-header"><div class="calendar-title">{currentDate ? `${monthsID[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Memuat Kalender...'}</div><div class="calendar-nav"><button type="button" class="cal-nav-btn" onclick={handlePrevMonth}>&lt;</button><button type="button" class="cal-nav-btn" onclick={handleNextMonth}>&gt;</button></div></div>
 			<div class="calendar-grid">
@@ -1425,6 +1427,7 @@
 				{/if}
 			</div>
 		</div>
+		</MovingBorder>
 	</section>
 {:else if showAllBerita}
 	<div class="page-peraturan-container"><section class="section">
