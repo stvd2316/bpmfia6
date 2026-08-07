@@ -75,6 +75,10 @@
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
+		/* Bola harus DI ATAS konten (z-index 2 > 1): konten kalender opaque
+		   (putih) akan menutupi bola jika bola di belakang — strip padding 1.5px
+		   terlalu tipis untuk terlihat. Glow transparan tidak mengganggu baca. */
+		z-index: 2;
 	}
 	.mb-svg {
 		position: absolute;
@@ -89,15 +93,15 @@
 		position: absolute;
 		top: 0;
 		left: 0;
-		width: 56px;
-		height: 56px;
+		width: 72px;
+		height: 72px;
 		border-radius: 50%;
 		background: radial-gradient(
 			circle,
-			rgba(255, 224, 138, 0.95) 0%,
-			rgba(255, 209, 85, 0.45) 30%,
-			rgba(240, 165, 0, 0.12) 55%,
-			transparent 70%
+			rgba(255, 232, 168, 0.95) 0%,
+			rgba(255, 209, 85, 0.55) 30%,
+			rgba(240, 165, 0, 0.18) 55%,
+			transparent 72%
 		);
 		mix-blend-mode: screen;
 		pointer-events: none;
@@ -106,5 +110,6 @@
 	.mb-content {
 		position: relative;
 		height: 100%;
+		z-index: 1;
 	}
 </style>
