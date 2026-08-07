@@ -193,6 +193,13 @@
 		display: flex;
 		gap: 20px;
 		overflow-x: auto;
+		/* overflow-y harus hidden EKSPLISIT: kalau auto (implisit dari overflow-x),
+		   iOS WKWebView menganggap area ini bisa scroll vertikal dan MENAHAN gesture
+		   scroll halaman saat jari di atas gambar — halaman jadi tidak bisa di-scroll
+		   dari bagian gambar. Dengan hidden, scroll vertikal diteruskan ke halaman,
+		   scroll horizontal tetap di carousel. */
+		overflow-y: hidden;
+		overscroll-behavior-x: contain;
 		scroll-snap-type: x mandatory;
 		-webkit-overflow-scrolling: touch;
 		touch-action: pan-x;
