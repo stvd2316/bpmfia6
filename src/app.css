@@ -168,14 +168,17 @@ body {
 .section { padding: 64px 5%; background: transparent; }
 .section-header { text-align: center; margin-bottom: 48px; }
 .section-header h2 { font-family: var(--font-heading); font-size: 36px; font-weight: 700; color: var(--ink); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; position: relative; display: inline-block; }
-.section-header h2::after { content: ''; display: block; width: 72px; height: 4px; margin: 14px auto 0; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--gold-2), transparent); animation: hdrBounce 1.2s ease-in-out infinite alternate; }
-/* Garis emas bawah header memantul dari UJUNG KIRI ke UJUNG KANAN layout
-   (seluruh lebar viewport): translateX ±(50vw - 36px) — 36px = setengah
-   lebar garis, jadi garis menyentuh persis kedua ujung layar.
-   Transform-only → ringan di HP. Bolak-balik via alternate + ease-in-out. */
+/* Garis emas bawah header: elemen sendiri (.hdr-line) agar memantul dari UJUNG
+   KIRI ke UJUNG KANAN layout — terlepas dari posisi h2. Transform-only (ringan).
+   - Header center (h2 di tengah): pantul simetris ±(45vw - 60px) → 5vw .. 95vw
+   - Header flex (h2 di kiri, mis. PERATURAN TERBARU/BERITA TERBARU): garis rata
+     kiri lalu translateX 0 → (90vw - 120px) → ujung kanan pas di 95vw */
+.hdr-line { display: block; width: 120px; height: 4px; margin: 14px auto 0; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--gold-2), transparent); animation: hdrBounce 1.2s ease-in-out infinite alternate; }
+.section-header:not([style*="flex"]) .hdr-line { --mb-from: calc(-45vw + 60px); --mb-to: calc(45vw - 60px); }
+.section-header[style*="flex"] .hdr-line { margin-left: 0; margin-right: auto; --mb-from: 0px; --mb-to: calc(90vw - 120px); }
 @keyframes hdrBounce {
-  from { transform: translateX(calc(-50vw + 36px)); }
-  to { transform: translateX(calc(50vw - 36px)); }
+  from { transform: translateX(var(--mb-from, 0px)); }
+  to { transform: translateX(var(--mb-to, 0px)); }
 }
 .section-header p { font-family: var(--font-body); color: var(--mute); font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 100%; margin: 0 auto; }
@@ -440,6 +443,6 @@ html, body { overflow-x: hidden; }
 /* Hormati pengguna yang meminta animasi minim */
 @media (prefers-reduced-motion: reduce) {
   .hero-content, .card { animation: none !important; }
-  .section-header h2::after { animation: none !important; }
+  .hdr-line { animation: none !important; }
   * { transition-duration: 0.01ms !important; }
 }
