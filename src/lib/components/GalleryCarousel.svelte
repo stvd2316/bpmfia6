@@ -196,11 +196,12 @@
 		overscroll-behavior-x: contain;
 		scroll-snap-type: x mandatory;
 		-webkit-overflow-scrolling: touch;
-		/* touch-action: pan-x pan-y — PENTING: pan-x saja melarang scroll VERTIKAL
-		   dari area ini (halaman tidak bisa discroll dari gambar). Dengan kedua
-		   arah diizinkan, browser membedakan gesture secara alami: geser
-		   horizontal → carousel, geser vertikal → halaman. */
-		touch-action: pan-x pan-y;
+		/* touch-action: pan-x pan-y pinch-zoom — PENTING: pan-x saja melarang
+		   scroll VERTIKAL dari area ini, dan tanpa kata kunci pinch-zoom, pinch
+		   2 jari di atas gambar juga diblokir. Dengan pan-x pan-y pinch-zoom:
+		   geser horizontal → carousel, vertikal → halaman, pinch 2 jari →
+		   zoom in/out halaman (gambar ikut membesar). */
+		touch-action: pan-x pan-y pinch-zoom;
 		padding-bottom: 8px;
 		scrollbar-width: none;
 	}
