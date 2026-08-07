@@ -1081,6 +1081,20 @@
 	};
 
 	const proxyUrl = (url: string) => `/api/image?url=${encodeURIComponent(url)}`;
+
+	// iOS Safari tidak merender PDF di dalam iframe (layar hitam) —
+	// buka viewer PDF native Safari di tab baru. Android/desktop tetap pakai overlay.
+	const isIOSDevice = () =>
+		/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+		(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+	const openPdf = (url: string) => {
+		if (isIOSDevice()) {
+			window.open(proxyUrl(url), '_blank', 'noopener');
+		} else {
+			viewingPdfUrl = url;
+		}
+	};
 </script>
 
 <!-- ============ MODAL LOGIN ============ -->
@@ -1524,7 +1538,7 @@
 				<div class="info-row"><div class="info-label">Status</div><div class="info-value"><span class="status-badge {selectedPeraturan.status === 'Berlaku' ? 'status-berlaku' : selectedPeraturan.status === 'Dicabut' ? 'status-dicabut' : 'status-diubah'}">{selectedPeraturan.status}</span></div></div>
 			</div>
 			<div class="action-buttons">
-				<button type="button" class="action-btn primary" disabled={!selectedPeraturan.pdf_url} onclick={() => (viewingPdfUrl = selectedPeraturan.pdf_url)}>View Document</button>
+				<button type="button" class="action-btn primary" disabled={!selectedPeraturan.pdf_url} onclick={() => openPdf(selectedPeraturan.pdf_url)}>View Document</button>
 				<button type="button" class="action-btn primary" disabled={!selectedPeraturan.pdf_url} onclick={() => handleDownload(selectedPeraturan.pdf_url, selectedPeraturan.judul + '.pdf')}>Download</button>
 			</div>
 			<h2 class="sub-heading">PERUBAHAN PERATURAN TERBARU</h2>
