@@ -1,14 +1,17 @@
 <script lang="ts">
 	// MovingBorder — garis emas tipis yang "berjalan" mengelilingi border luar
-	// konten (versi Svelte murni dari komponen React framer-motion
-	// "moving-border"). Tanpa JS runtime: animasi murni CSS
-	// (stroke-dashoffset pada SVG rect) — sangat ringan di HP.
+	// konten. Animasi stroke-dashoffset CSS, TAPI period dash = panjang path
+	// penuh (dihitung via JS) sehingga loop restart tidak terlihat — garis
+	// mengalir kontinu tanpa putus di titik mana pun.
+	import { onMount } from 'svelte';
+
 	let {
 		children,
 		borderRadius = '24px',
 		rx = '24',
 		ry = '24',
-		duration = '6s',
+		duration = '3s',
+		segment = 110,
 		class: className = ''
 	}: {
 		children: import('svelte').Snippet;
@@ -16,11 +19,42 @@
 		rx?: string;
 		ry?: string;
 		duration?: string;
+		segment?: number;
 		class?: string;
 	} = $props();
+
+	let pathRef = $state<SVGRectElement | null>(null);
+	let wrapRef = $state<HTMLDivElement | null>(null);
+
+	const updatePath = () => {
+		const p = pathRef;
+		if (!p) return;
+		try {
+			const L = p.getTotalLength();
+			if (L > 0) {
+				// Period dash = panjang path penuh: segmen + gap sisanya.
+				// Offset 0 → -L kembali ke posisi identik → loop tak terlihat.
+				p.style.strokeDasharray = `${segment} ${Math.max(10, L - segment)}`;
+				p.style.setProperty('--mb-len', `${L}px`);
+			}
+		} catch {
+			/* abaikan (SVG geometry tidak tersedia) */
+		}
+	};
+
+	onMount(() => {
+		updatePath();
+		if (typeof ResizeObserver !== 'undefined' && wrapRef) {
+			const ro = new ResizeObserver(updatePath);
+			ro.observe(wrapRef);
+			return () => ro.disconnect();
+		}
+		window.addEventListener('resize', updatePath);
+		return () => window.removeEventListener('resize', updatePath);
+	});
 </script>
 
-<div class="mb-wrap {className}" style="border-radius: {borderRadius}">
+<div class="mb-wrap {className}" style="border-radius: {borderRadius}" bind:this={wrapRef}>
 	<svg
 		class="mb-svg"
 		width="100%"
@@ -35,10 +69,11 @@
 				<stop offset="100%" stop-color="#f0a500" />
 			</linearGradient>
 		</defs>
-		<!-- Segmen garis emas yang berjalan: dasharray = panjang segmen + gap,
-		     dashoffset dianimasikan CSS sehingga segmen mengitari border. -->
+		<!-- Segmen garis emas berjalan; dasharray & --mb-len di-set JS agar
+		     period dash = keliling path (loop mulus). -->
 		<rect
 			class="mb-path"
+			bind:this={pathRef}
 			fill="none"
 			stroke="url(#mb-gold)"
 			stroke-width="3"
@@ -79,8 +114,9 @@
 	}
 	@keyframes mbDash {
 		to {
-			/* Periode dash (110 + 600) = 710 → offset -710 = satu putaran penuh */
-			stroke-dashoffset: -710;
+			/* -L (panjang path penuh, dari --mb-len) = satu putaran penuh;
+			   pattern pada -L identik dengan 0 → loop kontinu tanpa lompatan */
+			stroke-dashoffset: calc(-1 * var(--mb-len, 710px));
 		}
 	}
 	.mb-content {
