@@ -1180,7 +1180,7 @@
 						<div class="file-preview-grid">
 							{#each existingBeritaFiles as url, idx (idx)}
 								<div class="file-preview-item">
-									{#if url.endsWith('.pdf')}<div class="pdf-icon">PDF</div>{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" />{/if}
+									{#if url.endsWith('.pdf')}<div class="pdf-icon">PDF</div>{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" loading="lazy" />{/if}
 									<button type="button" class="btn-remove-file" onclick={() => handleRemoveExistingBeritaFile(idx)}>✕</button>
 								</div>
 							{/each}
@@ -1246,7 +1246,7 @@
 						<div class="file-preview-grid">
 							{#each existingAcaraFiles as url, idx (idx)}
 								<div class="file-preview-item">
-									{#if url.endsWith('.pdf')}<div class="pdf-icon">PDF</div>{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" />{/if}
+									{#if url.endsWith('.pdf')}<div class="pdf-icon">PDF</div>{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" loading="lazy" />{/if}
 									<button type="button" class="btn-remove-file" onclick={() => handleRemoveExistingAcaraFile(idx)}>✕</button>
 								</div>
 							{/each}
@@ -1305,7 +1305,7 @@
 
 <!-- ============ HALAMAN UTAMA ============ -->
 {#if !showAllPeraturan && !selectedPeraturan && !showAboutUs && !showStatusIkm && !showAllBerita && !selectedBerita}
-	<section class="hero" id="beranda" style="background-image: url('/assets/gedungfia.webp'); background-color: var(--surface-dark)">
+	<section class="hero" id="beranda" style="background-color: var(--surface-dark)">
 		<div class="hero-content">
 			<div class="hero-badge">SELAMAT DATANG</div>
 			<h1>Badan Perwakilan Mahasiswa FIA UI</h1>
@@ -1402,7 +1402,7 @@
 									<div class="event-files-grid">
 										{#each ev.file_urls as url, idx (idx)}
 											<a href={proxyUrl(url)} target="_blank" rel="noopener noreferrer" class="event-file-link">
-												{#if url.endsWith('.pdf')}<div class="pdf-icon">PDF</div>{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" />{/if}
+												{#if url.endsWith('.pdf')}<div class="pdf-icon">PDF</div>{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" loading="lazy" />{/if}
 											</a>
 										{/each}
 									</div>
@@ -1475,7 +1475,7 @@
 						{#if url.endsWith('.pdf')}
 							<a href={proxyUrl(url)} target="_blank" rel="noopener noreferrer" class="action-btn outline" style="align-self: flex-start">Lihat Dokumen PDF {idx + 1}</a>
 						{:else}
-							<div class="berita-image-item"><img src={proxyUrl(url)} alt="Gambar Berita {idx + 1}" /></div>
+							<div class="berita-image-item"><img src={proxyUrl(url)} alt="Gambar Berita {idx + 1}" loading="lazy" /></div>
 						{/if}
 					{/each}
 				</div>

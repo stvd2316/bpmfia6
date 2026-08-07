@@ -107,7 +107,7 @@
 	<div class="gal-track" bind:this={trackRef} role="region" aria-roledescription="carousel" aria-label="Galeri divisi">
 		{#each items as item (item.id)}
 			<div class="gal-card" role="group" aria-roledescription="slide" aria-label={item.title}>
-				<img src={item.image} alt={item.title} draggable={false} />
+				<img src={item.image} alt={item.title} draggable={false} loading="lazy" />
 			</div>
 		{/each}
 	</div>
