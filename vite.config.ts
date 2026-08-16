@@ -8,5 +8,12 @@ export default defineConfig({
 	server: {
 		port: 3000,
 		host: true
+	},
+	// PENTING iOS: target Safari 15 (iPhone 7 / iOS 15.8) — tanpa ini Vite
+	// memakai default 'baseline-widely-available' (≈Safari 16+) yang bisa
+	// menghasilkan sintaks tidak didukung iPhone lama → beberapa komponen
+	// error/tidak termuat di iOS. Safari 15 tetap jalan di browser modern.
+	build: {
+		target: 'safari15'
 	}
 });

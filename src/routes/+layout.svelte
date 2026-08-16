@@ -1,3 +1,21 @@
+<script module>
+	// PENTING iOS (iPhone 7 / iOS 15.8): Promise.withResolvers baru ada di
+	// Safari 17.4+ — pdfjs-dist memakainya (30×) → tanpa polyfill ini,
+	// thumbnail PDF gagal dimuat di iOS. Polyfill berjalan paling awal
+	// (module script dieksekusi sebelum komponen mana pun di-instantiate).
+	if (typeof (Promise as any).withResolvers === 'undefined') {
+		(Promise as any).withResolvers = function () {
+			let resolve: (value: unknown) => void = () => {};
+			let reject: (reason?: unknown) => void = () => {};
+			const promise = new Promise((res, rej) => {
+				resolve = res;
+				reject = rej;
+			});
+			return { promise, resolve, reject };
+		};
+	}
+</script>
+
 <script lang="ts">
 	import '../app.css';
 

@@ -39,9 +39,18 @@
 		canvas.height = Math.floor(vp.height);
 		const ctx = canvas.getContext('2d');
 		if (!ctx) throw new Error('canvas 2d tidak tersedia');
-		// pdfjs v6: render menerima `canvas` langsung (bukan canvasContext)
-		await page.render({ canvas, viewport: vp }).promise;
-		imgUrl = canvas.toDataURL('image/webp', 0.82);
+		// pdfjs v4: render menerima canvasContext
+		await page.render({ canvasContext: ctx, viewport: vp }).promise;
+		// PENTING iOS: Safari TIDAK mendukung encoding WebP di canvas
+		// (toDataURL('image/webp') bisa gagal/error di iPhone) → deteksi dukungan
+		// sekali, fallback ke JPEG (didukung semua browser, ukuran juga ringan)
+		let fmt = 'image/jpeg';
+		try {
+			if (canvas.toDataURL('image/webp', 1).startsWith('data:image/webp')) fmt = 'image/webp';
+		} catch {
+			fmt = 'image/jpeg';
+		}
+		imgUrl = canvas.toDataURL(fmt, 0.85);
 		await task.destroy();
 	}
 </script>
