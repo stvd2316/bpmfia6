@@ -63,17 +63,19 @@
 				log('10. fetch PDF via proxy: GAGAL — ' + (e as Error).message);
 			}
 		}
-		// Tes render pdfjs dengan fake worker (persis jalur iOS di PdfThumbnail)
+		// Tes render pdfjs: jalur NORMAL (worker + workerSrc) lalu fallback fake worker
 		if (pdfUrl) {
 			try {
 				const mod = await import('pdfjs-dist');
 				log('11. pdfjs import: OK (v' + (mod as any).version + ')');
-				const savedWorker = (window as any).Worker;
-				(window as any).Worker = undefined;
+				const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+				mod.GlobalWorkerOptions.workerSrc = worker.default;
+				log('11b. workerSrc di-set: OK');
+				// Percobaan 1: worker normal
 				try {
 					const task = mod.getDocument({ url: '/api/download?url=' + encodeURIComponent(pdfUrl) });
 					const doc = await task.promise;
-					log('12. dokumen PDF terbuka: ' + doc.numPages + ' halaman');
+					log('12. [worker normal] dokumen terbuka: ' + doc.numPages + ' halaman');
 					const page = await doc.getPage(1);
 					const vp = page.getViewport({ scale: 1 });
 					const scale = 900 / vp.width;
@@ -84,7 +86,6 @@
 					const ctx = canvas.getContext('2d');
 					if (!ctx) throw new Error('canvas 2d null');
 					await page.render({ canvasContext: ctx, viewport: vp2 }).promise;
-					log('13. render halaman 1: OK (' + canvas.width + 'x' + canvas.height + ')');
 					let fmt = 'image/jpeg';
 					try {
 						if (canvas.toDataURL('image/webp', 1).startsWith('data:image/webp')) fmt = 'image/webp';
@@ -92,14 +93,42 @@
 						fmt = 'image/jpeg';
 					}
 					thumbImg = canvas.toDataURL(fmt, 0.85);
-					log('14. toDataURL: OK (' + fmt + ')');
+					log('13. [worker normal] render + toDataURL: OK (' + fmt + ')');
 					await task.destroy();
-				} finally {
-					(window as any).Worker = savedWorker;
+				} catch (e) {
+					log('12. [worker normal] GAGAL — ' + (e as Error).message);
+					log('    stack: ' + ((e as Error).stack || '').slice(0, 250));
+					// Percobaan 2: fake worker (workerSrc tetap di-set)
+					try {
+						const savedWorker = (window as any).Worker;
+						(window as any).Worker = undefined;
+						try {
+							const task = mod.getDocument({ url: '/api/download?url=' + encodeURIComponent(pdfUrl) });
+							const doc = await task.promise;
+							log('12b. [fake worker] dokumen terbuka: ' + doc.numPages + ' halaman');
+							const page = await doc.getPage(1);
+							const vp = page.getViewport({ scale: 1 });
+							const scale = 900 / vp.width;
+							const vp2 = page.getViewport({ scale });
+							const canvas = document.createElement('canvas');
+							canvas.width = Math.floor(vp2.width);
+							canvas.height = Math.floor(vp2.height);
+							const ctx = canvas.getContext('2d');
+							if (!ctx) throw new Error('canvas 2d null');
+							await page.render({ canvasContext: ctx, viewport: vp2 }).promise;
+							thumbImg = canvas.toDataURL('image/jpeg', 0.85);
+							log('13. [fake worker] render + toDataURL: OK (jpeg)');
+							await task.destroy();
+						} finally {
+							(window as any).Worker = savedWorker;
+						}
+					} catch (e2) {
+						log('13. [fake worker] GAGAL — ' + (e2 as Error).message);
+						log('    stack: ' + ((e2 as Error).stack || '').slice(0, 250));
+					}
 				}
 			} catch (e) {
-				log('15. RENDER GAGAL — ' + (e as Error).message);
-				log('    stack: ' + ((e as Error).stack || '').slice(0, 300));
+				log('11. pdfjs import GAGAL — ' + (e as Error).message);
 			}
 		}
 		log('--- SELESAI ---');
