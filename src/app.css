@@ -261,11 +261,11 @@ body {
 .event-meta strong { color: var(--ink); font-weight: 700; }
 .no-events { text-align: center; color: var(--mute); font-style: italic; padding: 16px; }
 .add-event-btn { margin-top: 16px; width: 100%; }
-/* File acara ISS: gambar & PDF tampil FULL-WIDTH (rasio asli) — disamakan
-   dengan preview gambar/PDF di Berita agar cukup besar dilihat dari preview.
-   margin -44px: menembus padding .event-item (20px) + .iss-container (24px)
-   → selebar kartu kalender penuh (lebih besar dari gambar berita) */
-.event-files-grid { display: flex; flex-direction: column; gap: 16px; margin: 16px -44px 0; }
+/* File acara ISS: gambar & PDF tampil FULL-WIDTH (rasio asli) — sebesar
+   mungkin TAPI tetap rapi di dalam kartu acara: margin -16px menembus
+   sebagian padding .event-item (20px), menyisakan 4px dari tepi kartu
+   (border & radius kartu tetap terlihat, tidak tertutup gambar) */
+.event-files-grid { display: flex; flex-direction: column; gap: 16px; margin: 16px -16px 0; }
 .event-file-link { display: block; border: 1px solid rgba(10, 10, 12, 0.1); border-radius: var(--radius-md); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(10, 10, 12, 0.08); background: var(--canvas); }
 .event-file-link:hover { transform: scale(1.03); box-shadow: 0 8px 24px rgba(255, 209, 85, 0.25), 0 8px 22px rgba(10, 10, 12, 0.14); }
 /* Preview gambar: TIDAK dicrop kotak — tampil penuh sesuai rasio asli */
