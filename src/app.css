@@ -348,7 +348,12 @@ body {
 .pdf-viewer-title { font-family: var(--font-heading); font-weight: 700; text-transform: uppercase; font-size: 14px; flex: 1; margin-right: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--primary-gold); }
 .pdf-viewer-close { background: var(--status-error); color: var(--on-dark); border: none; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-family: var(--font-heading); font-weight: 700; text-transform: uppercase; font-size: 12px; flex-shrink: 0; transition: all 0.2s; }
 .pdf-viewer-close:hover { background: #ef4444; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4); }
-.pdf-container { background: #525659; padding: 0; border-radius: 0; width: 100%; height: 100%; flex-grow: 1; overflow: hidden; box-shadow: none; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.pdf-container { background: #525659; padding: 0; border-radius: 0; width: 100%; height: 100%; flex-grow: 1; overflow: hidden; box-shadow: none; }
+/* Fix viewer blank (0px lebar): .pdf-container lama pakai align-items:center
+   sehingga embedpdf-container menyusut ke lebar konten = 0. Sekarang anak
+   di-stretch penuh: wrapper 100% + custom element display:block flex:1 */
+.pdf-container > div { width: 100%; height: 100%; display: flex; flex-direction: column; }
+.pdf-container embedpdf-container { display: block; flex: 1 1 auto; min-height: 0; width: 100%; }
 
 /* ========================================= */
 /* PAGINATION                                */
