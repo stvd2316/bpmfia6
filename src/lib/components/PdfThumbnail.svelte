@@ -28,9 +28,9 @@
 		const task = pdfjs.getDocument({ url: u });
 		const doc = await task.promise;
 		const page = await doc.getPage(1);
-		// Lebar target ~300px CSS — cukup tajam untuk preview (ukuran asli PDF
-		// dipertahankan via rasio halaman, A4 = 1:1.414)
-		const targetW = 300;
+		// Render 900px CSS — ditampilkan hingga full-width konten (~800px) dengan
+		// downscale → TAJAM (sebelumnya 300px di-upscale → buram)
+		const targetW = 900;
 		const vp1 = page.getViewport({ scale: 1 });
 		const scale = targetW / vp1.width;
 		const vp = page.getViewport({ scale });
