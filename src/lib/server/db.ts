@@ -6,6 +6,12 @@ import { Kysely, PostgresDialect } from 'kysely';
 import pg from 'pg';
 import { env } from '$env/dynamic/private';
 
+// PENTING: paksa UTC — node-postgres mengirim timestamp sebagai waktu LOKAL
+// server (Windows = WIB/UTC+7) tanpa offset → tersimpan salah → semua expiry
+// (OTP/sesi) terlihat "kedaluwarsa" 7 jam lebih awal. Dengan TZ=UTC, serialize
+// & parse timestamp konsisten dengan now() database.
+process.env.TZ = 'UTC';
+
 const connectionString = env.DATABASE_URL;
 
 if (!connectionString || connectionString.startsWith('ISI_')) {
