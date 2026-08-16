@@ -1084,15 +1084,18 @@
 
 	// iOS Safari tidak merender PDF di dalam iframe (layar hitam) —
 	// buka viewer PDF native Safari di tab baru. Android/desktop tetap pakai overlay.
-	const isIOSDevice = () =>
-		/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-		(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+	// PDF viewer: @embedpdf/svelte-pdf-viewer (render PDF via canvas/wasm —
+	// tampil LANGSUNG di browser Android & iOS, tanpa "Open" tab baru).
+	// Komponen di-import LAZY (hanya saat PDF pertama kali dibuka) supaya
+	// bundle awal website tetap ringan.
+	let PdfViewerComponent = $state<typeof import('@embedpdf/svelte-pdf-viewer').PDFViewer | null>(null);
 
 	const openPdf = (url: string) => {
-		if (isIOSDevice()) {
-			window.open(proxyUrl(url), '_blank', 'noopener');
-		} else {
-			viewingPdfUrl = url;
+		viewingPdfUrl = url;
+		if (!PdfViewerComponent) {
+			import('@embedpdf/svelte-pdf-viewer').then((m) => {
+				PdfViewerComponent = m.PDFViewer;
+			});
 		}
 	};
 </script>
@@ -1276,7 +1279,13 @@
 			<span class="pdf-viewer-title">{selectedPeraturan ? selectedPeraturan.judul : 'Document'}</span>
 			<button type="button" class="pdf-viewer-close" onclick={() => (viewingPdfUrl = null)}>Tutup (X)</button>
 		</div>
-		<div class="pdf-container"><iframe src={proxyUrl(viewingPdfUrl)} title="PDF Viewer" style="width: 100%; height: 100%; border: none"></iframe></div>
+		<div class="pdf-container">
+			{#if PdfViewerComponent}
+				<PdfViewerComponent config={{ src: proxyUrl(viewingPdfUrl), theme: { preference: 'light' } }} />
+			{:else}
+				<div style="color: var(--on-dark); font-family: var(--font-body); text-align: center">Memuat penampil PDF…</div>
+			{/if}
+		</div>
 	</div>
 {/if}
 
@@ -1292,7 +1301,7 @@
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToHome(); menuOpen = false; }}>Beranda</a></li>
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToAllPeraturan(); menuOpen = false; }}>Peraturan</a></li>
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToAllBerita(); menuOpen = false; }}>Berita</a></li>
-		<li><a href="#" onclick={(e) => { e.preventDefault(); goToAboutUs(); menuOpen = false; }}>About Us</a></li>
+		<li><a href="#" onclick={(e) => { e.preventDefault(); goToAboutUs(); menuOpen = false; }}>TENTANG KAMI</a></li>
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToStatusIkm(); menuOpen = false; }}>Cek Status IKM</a></li>
 		<li><a href="#" onclick={(e) => { e.preventDefault(); goToKontak(); menuOpen = false; }}>Kontak</a></li>
 		{#if !isAdmin}<li><a href="#" class="mobile-admin-link" onclick={(e) => { e.preventDefault(); showLogin = true; menuOpen = false; }}>Admin Login</a></li>{/if}
@@ -1359,7 +1368,7 @@
 	</section>
 
 	<section class="section" id="iss">
-		<div class="section-header"><h2>ISS (Integrated Scheduling System)</h2><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh ORMAWA FIA UI</p></div>
+		<div class="section-header"><h2>Integrated Scheduling System</h2><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh ORMAWA FIA UI</p></div>
 		<div class="iss-container">
 			<div class="calendar-header"><div class="calendar-title">{currentDate ? `${monthsID[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Memuat Kalender...'}</div><div class="calendar-nav"><button type="button" class="cal-nav-btn" onclick={handlePrevMonth}>&lt;</button><button type="button" class="cal-nav-btn" onclick={handleNextMonth}>&gt;</button></div></div>
 			<div class="calendar-grid">
@@ -1401,7 +1410,7 @@
 								{#if ev.file_urls && ev.file_urls.length > 0}
 									<div class="event-files-grid">
 										{#each ev.file_urls as url, idx (idx)}
-											<a href={proxyUrl(url)} target="_blank" rel="noopener noreferrer" class="event-file-link">
+											<a href={url.endsWith('.pdf') ? '#' : proxyUrl(url)} target={url.endsWith('.pdf') ? undefined : '_blank'} rel="noopener noreferrer" class="event-file-link" onclick={(e) => { if (url.endsWith('.pdf')) { e.preventDefault(); openPdf(url); } }}>
 												{#if url.endsWith('.pdf')}<div class="pdf-icon">PDF</div>{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" loading="lazy" />{/if}
 											</a>
 										{/each}
@@ -1473,7 +1482,7 @@
 				<div class="berita-images-grid">
 					{#each selectedBerita.file_urls as url, idx (idx)}
 						{#if url.endsWith('.pdf')}
-							<a href={proxyUrl(url)} target="_blank" rel="noopener noreferrer" class="action-btn outline" style="align-self: flex-start">Lihat Dokumen PDF {idx + 1}</a>
+							<a href="#" onclick={(e) => { e.preventDefault(); openPdf(url); }} class="action-btn outline" style="align-self: flex-start">Lihat Dokumen PDF {idx + 1}</a>
 						{:else}
 							<div class="berita-image-item"><img src={proxyUrl(url)} alt="Gambar Berita {idx + 1}" loading="lazy" /></div>
 						{/if}
@@ -1517,7 +1526,7 @@
 {:else if showAboutUs}
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goBack}>← Kembali ke Beranda</button>
-		<div class="section-header"><h2>About Us</h2><p>Kepengurusan Badan Perwakilan Mahasiswa FIA UI</p></div>
+		<div class="section-header"><h2>TENTANG KAMI</h2><p>Kepengurusan Badan Perwakilan Mahasiswa FIA UI</p></div>
 		<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 700px; padding: 40px 0">
 			<p style="font-style: italic; margin-bottom: 32px; color: var(--mute); font-family: var(--font-body); font-size: 16px; text-align: center">Swipe ke kanan atau kiri untuk melihat foto setiap divisi/komisi</p>
 			<GalleryCarousel
@@ -1603,9 +1612,9 @@
 				<a href="https://lin.ee/pteZwX4" target="_blank" rel="noopener noreferrer" title="Line"><img src="/assets/line.png" alt="Line" width="20" height="20" style="filter: brightness(0) invert(1)" /></a>
 			</div>
 		</div>
-		<div class="footer-links"><h4>Navigasi</h4><ul><li><a href="#" onclick={(e) => { e.preventDefault(); goToHome(); }}>Beranda</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAllPeraturan(); }}>Peraturan</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToBerita(); }}>Berita</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAboutUs(); }}>About Us</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToStatusIkm(); }}>Cek Status IKM</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToKontak(); }}>Kontak</a></li></ul></div>
+		<div class="footer-links"><h4>Navigasi</h4><ul><li><a href="#" onclick={(e) => { e.preventDefault(); goToHome(); }}>Beranda</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAllPeraturan(); }}>Peraturan</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToBerita(); }}>Berita</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAboutUs(); }}>TENTANG KAMI</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToStatusIkm(); }}>Cek Status IKM</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToKontak(); }}>Kontak</a></li></ul></div>
 		<div class="footer-links"><h4>Kontak</h4><ul><li><a href="https://maps.app.goo.gl/EXW9DaKNgcBmMQ9p9" target="_blank" rel="noopener noreferrer">Gedung M FIA UI, Depok</a></li><li><a href="https://maps.app.goo.gl/J6nVMzbrYQbwysQCA" target="_blank" rel="noopener noreferrer">Gedung Baru FIA UI</a></li><li><a href="mailto:reformasibpmfiaui@gmail.com">reformasibpmfiaui@gmail.com</a></li></ul></div>
 	</div>
-	<div class="footer-bottom">BPM FIA UI</div>
+	<div class="footer-bottom">BPM FIA UI 2026 #REFORM</div>
 </footer>
 
