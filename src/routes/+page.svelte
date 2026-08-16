@@ -4,6 +4,7 @@
 	import LocalImagePreview from '$lib/components/LocalImagePreview.svelte';
 	import TextWithLinks from '$lib/components/TextWithLinks.svelte';
 	import GalleryCarousel from '$lib/components/GalleryCarousel.svelte';
+	import PdfThumbnail from '$lib/components/PdfThumbnail.svelte';
 
 	// ================= STATE (port 1:1 dari useState page.tsx) =================
 
@@ -1426,7 +1427,7 @@
 									<div class="event-files-grid">
 										{#each ev.file_urls as url, idx (idx)}
 											<a href="#" rel="noopener noreferrer" class="event-file-link" onclick={(e) => { e.preventDefault(); if (url.endsWith('.pdf')) { openPdf(url); } else { openImage(url); } }}>
-												{#if url.endsWith('.pdf')}<div class="pdf-icon">PDF</div>{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" loading="lazy" />{/if}
+												{#if url.endsWith('.pdf')}<PdfThumbnail url={proxyUrl(url)} />{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" loading="lazy" />{/if}
 											</a>
 										{/each}
 									</div>
@@ -1497,7 +1498,10 @@
 				<div class="berita-images-grid">
 					{#each selectedBerita.file_urls as url, idx (idx)}
 						{#if url.endsWith('.pdf')}
-							<a href="#" onclick={(e) => { e.preventDefault(); openPdf(url); }} class="action-btn outline" style="align-self: flex-start">Lihat Dokumen PDF {idx + 1}</a>
+							<a href="#" onclick={(e) => { e.preventDefault(); openPdf(url); }} class="berita-pdf-thumb">
+								<PdfThumbnail url={proxyUrl(url)} />
+								<span class="berita-pdf-label">Lihat Dokumen PDF {idx + 1}</span>
+							</a>
 						{:else}
 							<div class="berita-image-item"><img src={proxyUrl(url)} alt="Gambar Berita {idx + 1}" loading="lazy" /></div>
 						{/if}
