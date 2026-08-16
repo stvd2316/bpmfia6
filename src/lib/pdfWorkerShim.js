@@ -6,7 +6,9 @@
 // bersama kode worker pdfjs — polyfill dieksekusi PERTAMA di konteks worker.
 if (typeof Promise.withResolvers === 'undefined') {
 	Promise.withResolvers = function () {
+		/** @type {(value: unknown) => void} */
 		let resolve = () => {};
+		/** @type {(reason?: unknown) => void} */
 		let reject = () => {};
 		const promise = new Promise((res, rej) => {
 			resolve = res;
