@@ -1,4 +1,4 @@
-// Tes kirim email via SMTP Gmail (untuk verifikasi app password)
+// Tes kirim email via SMTP (Brevo/Gmail) — baca .env.local
 import nodemailer from 'nodemailer';
 import { readFileSync } from 'node:fs';
 
@@ -9,15 +9,20 @@ for (const line of raw.split('\n')) {
 	if (m) env[m[1]] = m[2];
 }
 
+const host = env.SMTP_HOST || 'smtp.gmail.com';
+const port = Number(env.SMTP_PORT || 465);
+
 const transporter = nodemailer.createTransport({
-	service: 'gmail',
-	auth: { user: env.SMTP_GMAIL_USER, pass: env.SMTP_GMAIL_APP_PASSWORD }
+	host,
+	port,
+	secure: port === 465,
+	auth: { user: env.SMTP_USER, pass: env.SMTP_PASS }
 });
 
 try {
 	const info = await transporter.sendMail({
-		from: `"BPM FIA UI" <${env.SMTP_GMAIL_USER}>`,
-		to: 'stvd2316@gmail.com',
+		from: `"BPM FIA UI" <${env.SMTP_USER}>`,
+		to: env.TEST_RECEIVER || env.SMTP_USER,
 		subject: 'Tes SMTP BPM FIA UI',
 		text: 'Kalau kamu melihat email ini, SMTP berfungsi!'
 	});
