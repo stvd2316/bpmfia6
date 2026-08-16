@@ -1,8 +1,0 @@
-// Emails yang DIIZINKAN login admin (shared — dipakai server & client).
-// Tambah email baru di sini (huruf kecil).
-export const ADMIN_EMAILS: string[] = ['stvd2316@gmail.com', 'reformasibpmfiaui@gmail.com'];
-
-export function isAdminEmail(email: string | null | undefined): boolean {
-	if (!email) return false;
-	return ADMIN_EMAILS.includes(email.toLowerCase().trim());
-}

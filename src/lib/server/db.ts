@@ -21,12 +21,14 @@ if (!connectionString || connectionString.startsWith('ISI_')) {
 	);
 }
 
-const dialect = new PostgresDialect({
-	pool: new pg.Pool({
-		connectionString: connectionString && !connectionString.startsWith('ISI_') ? connectionString : undefined,
-		max: 10
-	})
+// Pool diekspor agar bisa dipakai langsung (adminStore) & oleh Kysely
+export const pool = new pg.Pool({
+	connectionString: connectionString && !connectionString.startsWith('ISI_') ? connectionString : undefined,
+	max: 10,
+	connectionTimeoutMillis: 8000
 });
+
+const dialect = new PostgresDialect({ pool });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const db = new Kysely<any>({ dialect });

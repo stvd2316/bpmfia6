@@ -5,7 +5,7 @@ import { kyselyAdapter } from '@better-auth/kysely-adapter';
 import { env } from '$env/dynamic/private';
 import { db } from './db';
 import { sendOtpEmail, smtpSiap } from './mailer';
-import { isAdminEmail } from '$lib/adminEmails';
+import { isAdminEmailDb } from './adminStore';
 
 export const auth = betterAuth({
 	// $env/dynamic/private: SvelteKit membaca .env.local (dev) & env Vercel (produksi)
@@ -19,8 +19,8 @@ export const auth = betterAuth({
 			otpLength: 6,
 			expiresIn: 300,
 			async sendVerificationOTP({ email, otp }) {
-				// Hanya kirim OTP ke email yang diizinkan admin (whitelist)
-				if (!isAdminEmail(email)) {
+				// Hanya kirim OTP ke email yang terdaftar sebagai admin (tabel admin_emails)
+				if (!(await isAdminEmailDb(email))) {
 					console.warn(`[better-auth] OTP diminta untuk email non-admin: ${email} — tidak dikirim.`);
 					return;
 				}

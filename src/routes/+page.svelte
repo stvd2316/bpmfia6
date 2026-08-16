@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase';
 	import { authClient, sendAdminOtp, verifyAdminOtp } from '$lib/auth-client';
-	import { isAdminEmail } from '$lib/adminEmails';
 	import LocalImagePreview from '$lib/components/LocalImagePreview.svelte';
 	import TextWithLinks from '$lib/components/TextWithLinks.svelte';
 	import GalleryCarousel from '$lib/components/GalleryCarousel.svelte';
@@ -39,6 +38,22 @@
 	let adminAuthError = $state('');
 	let adminBusy = $state(false);
 	let showLogoutConfirm = $state(false);
+	// Dashboard admin: daftar email admin (tabel admin_emails)
+	let adminDashOpen = $state(false);
+	let adminList = $state<string[]>([]);
+	let adminSessionEmail = $state<string | null>(null);
+	let newAdminEmail = $state('');
+	let adminDashMsg = $state('');
+	let adminDashErr = $state('');
+	let adminDashBusy = $state(false);
+	// Hapus admin: konfirmasi kalimat → OTP ulang
+	let removeTarget = $state<string | null>(null);
+	let removeKalimat = $state('');
+	let removeOtpStep = $state(false);
+	let removeOtp = $state('');
+	let removeMsg = $state('');
+	let removeErr = $state('');
+	let removeBusy = $state(false);
 
 	// Form Peraturan
 	let showForm = $state(false);
@@ -622,14 +637,28 @@
 	// otomatis HAPUS saat browser ditutup. Kalau sesi server masih ada tapi
 	// cookie indikator hilang = browser baru dibuka → logout otomatis.
 	const ADMIN_LIVE_COOKIE = 'bpm_admin_live=1; path=/; SameSite=Lax';
+	const KALIMAT_HAPUS = 'saya akan menghapus email berikut sebagai admin dan saya sudah memahaminya';
+
+	const fetchAdminList = async (): Promise<string[]> => {
+		try {
+			const res = await fetch('/api/admin-emails');
+			if (!res.ok) return [];
+			const data = await res.json();
+			return (data.emails || []).map((e: string) => e.toLowerCase());
+		} catch {
+			return [];
+		}
+	};
 
 	const checkAdminSession = async () => {
 		try {
 			const { data } = await authClient.getSession();
+			const list = await fetchAdminList();
+			adminList = list;
 			const hasSession = !!(data?.session && data?.user);
-			const hasLiveCookie = document.cookie.includes('bpm_admin_live=1');
-			if (hasSession && isAdminEmail(data?.user?.email)) {
-				if (!hasLiveCookie) {
+			const isListed = list.includes((data?.user?.email || '').toLowerCase());
+			if (hasSession && isListed) {
+				if (!document.cookie.includes('bpm_admin_live=1')) {
 					// Browser baru dibuka (cookie session hilang saat tutup) → logout server
 					await authClient.signOut();
 					isAdmin = false;
@@ -647,7 +676,9 @@
 	const handleAdminSendOtp = async (e: SubmitEvent) => {
 		e.preventDefault();
 		adminAuthError = '';
-		if (!isAdminEmail(adminEmail)) {
+		const list = await fetchAdminList();
+		adminList = list;
+		if (!list.includes(adminEmail.toLowerCase().trim())) {
 			adminAuthError = 'Email tidak terdaftar sebagai admin.';
 			return;
 		}
@@ -704,9 +735,116 @@
 			/* tetap logout lokal */
 		}
 		document.cookie = 'bpm_admin_live=1; path=/; SameSite=Lax; Max-Age=0';
-	};
+		};
 
-	// ================= FORM PERATURAN =================
+		// ================= DASHBOARD ADMIN (daftar email admin) =================
+
+		const openAdminDash = async () => {
+			adminDashOpen = true;
+			adminDashMsg = '';
+			adminDashErr = '';
+			adminList = await fetchAdminList();
+			try {
+				const { data } = await authClient.getSession();
+				adminSessionEmail = data?.user?.email || null;
+			} catch {
+				adminSessionEmail = null;
+			}
+		};
+
+		const handleAddAdmin = async (e: SubmitEvent) => {
+			e.preventDefault();
+			adminDashErr = '';
+			adminDashMsg = '';
+			adminDashBusy = true;
+			try {
+				const res = await fetch('/api/admin-emails', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ email: newAdminEmail })
+				});
+				const data = await res.json().catch(() => ({}));
+				if (!res.ok) {
+					adminDashErr = data.message || 'Gagal menambah email admin.';
+				} else {
+					adminList = (data.emails || adminList).map((e: string) => e.toLowerCase());
+					newAdminEmail = '';
+					adminDashMsg = 'Email admin berhasil ditambahkan.';
+				}
+			} catch {
+				adminDashErr = 'Terjadi kesalahan jaringan.';
+			}
+			adminDashBusy = false;
+		};
+
+		const startRemoveAdmin = (email: string) => {
+			removeTarget = email;
+			removeKalimat = '';
+			removeOtpStep = false;
+			removeOtp = '';
+			removeMsg = '';
+			removeErr = '';
+			removeBusy = false;
+		};
+
+		const submitRemoveKalimat = async () => {
+			removeErr = '';
+			if (removeKalimat.trim() !== KALIMAT_HAPUS) {
+				removeErr = 'Kalimat konfirmasi tidak sesuai.';
+				return;
+			}
+			removeBusy = true;
+			try {
+				const res = await fetch('/api/admin-emails', {
+					method: 'DELETE',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ email: removeTarget, kalimat: removeKalimat.trim() })
+				});
+				const data = await res.json().catch(() => ({}));
+				if (!res.ok) {
+					removeErr = data.message || 'Gagal memproses permintaan.';
+					removeBusy = false;
+					return;
+				}
+				if (data.needOtp) {
+					removeOtpStep = true;
+					removeMsg = `Kode OTP verifikasi dikirim ke email admin kamu (${adminSessionEmail}). Cek inbox — berlaku 5 menit.`;
+				}
+			} catch {
+				removeErr = 'Terjadi kesalahan jaringan.';
+			}
+			removeBusy = false;
+		};
+
+		const submitRemoveOtp = async (e: SubmitEvent) => {
+			e.preventDefault();
+			removeErr = '';
+			removeBusy = true;
+			try {
+				const res = await fetch('/api/admin-emails', {
+					method: 'DELETE',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ email: removeTarget, kalimat: removeKalimat.trim(), otp: removeOtp })
+				});
+				const data = await res.json().catch(() => ({}));
+				if (!res.ok) {
+					removeErr = data.message || 'Kode OTP salah atau kedaluwarsa.';
+					removeBusy = false;
+					return;
+				}
+				adminList = (data.emails || adminList).map((e: string) => e.toLowerCase());
+				adminDashMsg = `Email ${removeTarget} berhasil dihapus sebagai admin.`;
+				removeTarget = null;
+				removeOtpStep = false;
+				removeOtp = '';
+				removeKalimat = '';
+			} catch {
+				removeErr = 'Terjadi kesalahan jaringan.';
+			}
+			removeBusy = false;
+		};
+
+		// ================= FORM PERATURAN =================
 
 	const openAddForm = () => {
 		editingId = null;
@@ -1206,6 +1344,65 @@
 	</div>
 {/if}
 
+<!-- ============ DASHBOARD ADMIN ============ -->
+{#if adminDashOpen}
+	<div class="modal-overlay" onclick={() => (adminDashOpen = false)}>
+		<div class="modal-content" style="max-width: 560px" onclick={(e) => e.stopPropagation()}>
+			<h2 class="modal-title">Dashboard Admin</h2>
+			<p style="font-family: var(--font-body); color: var(--mute); font-size: 13px; margin: -8px 0 16px; line-height: 1.5;">Daftar email yang memiliki akses mode Admin. Email baru otomatis mendukung login verifikasi OTP.</p>
+			{#if adminDashMsg}<p class="admin-dash-msg">{adminDashMsg}</p>{/if}
+			{#if adminDashErr}<p class="error-text">{adminDashErr}</p>{/if}
+			<div style="max-height: 260px; overflow-y: auto; border: 1px solid var(--hairline-strong); border-radius: 12px; margin-bottom: 16px;">
+				{#each adminList as email}
+					<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--hairline-soft); font-family: var(--font-body);">
+						<span style="font-size: 14px; color: var(--ink); word-break: break-all;">{email}</span>
+						<span style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+							{#if email === adminSessionEmail}
+								<span class="admin-dash-badge">Anda</span>
+							{:else}
+								<button type="button" class="action-btn outline" style="padding: 4px 10px; font-size: 12px;" onclick={() => startRemoveAdmin(email)}>Hapus</button>
+							{/if}
+						</span>
+					</div>
+				{/each}
+				{#if adminList.length === 0}
+					<p style="padding: 16px; text-align: center; font-family: var(--font-body); color: var(--mute); font-size: 13px;">Belum ada email admin.</p>
+				{/if}
+			</div>
+			<form onsubmit={handleAddAdmin} style="display: flex; gap: 8px;">
+				<input type="email" class="form-input" style="flex: 1" placeholder="emailbaru@gmail.com" value={newAdminEmail} oninput={(e) => (newAdminEmail = val(e))} required />
+				<button type="submit" class="btn-primary" style="white-space: nowrap" disabled={adminDashBusy}>{adminDashBusy ? 'Menambah...' : 'Tambah Admin'}</button>
+			</form>
+			<div class="form-actions" style="margin-top: 20px;"><button type="button" class="action-btn outline" style="flex: 1; justify-content: center; background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong)" onclick={() => (adminDashOpen = false)}>Tutup</button></div>
+		</div>
+	</div>
+{/if}
+
+<!-- ============ HAPUS ADMIN (konfirmasi kalimat + OTP) ============ -->
+{#if removeTarget}
+	<div class="modal-overlay" onclick={() => (removeTarget = null)}>
+		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
+			{#if !removeOtpStep}
+				<h2 class="modal-title">Hapus Admin</h2>
+				<p style="font-family: var(--font-body); color: var(--body); font-size: 14px; line-height: 1.6; margin-bottom: 16px;">Kamu akan menghapus <strong style="color: var(--ink); word-break: break-all;">{removeTarget}</strong> sebagai admin. Email ini tidak akan bisa login admin lagi.</p>
+				<p style="font-family: var(--font-body); color: var(--mute); font-size: 13px; margin-bottom: 8px;">Ketik kalimat berikut untuk melanjutkan:</p>
+				<p class="admin-dash-msg" style="margin-bottom: 8px;">"saya akan menghapus email berikut sebagai admin dan saya sudah memahaminya"</p>
+				<textarea class="form-input" style="width: 100%; min-height: 72px; resize: vertical;" value={removeKalimat} oninput={(e) => (removeKalimat = val(e))} placeholder="Ketik kalimat konfirmasi di sini..."></textarea>
+				{#if removeErr}<p class="error-text">{removeErr}</p>{/if}
+				<div class="form-actions"><button type="button" class="btn-primary" style="flex: 1" onclick={submitRemoveKalimat} disabled={removeBusy}>{removeBusy ? 'Memproses...' : 'Lanjutkan'}</button><button type="button" class="action-btn outline" style="flex: 1; justify-content: center; background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong)" onclick={() => (removeTarget = null)}>Batal</button></div>
+			{:else}
+				<h2 class="modal-title">Verifikasi OTP</h2>
+				<p class="admin-otp-hint">{removeMsg}</p>
+				<form onsubmit={submitRemoveOtp}>
+					<div class="form-group"><label class="form-label">Kode OTP (6 digit)</label><input type="text" class="form-input" inputmode="numeric" maxlength="6" placeholder="000000" value={removeOtp} oninput={(e) => (removeOtp = val(e).replace(/\D/g, ''))} required autocomplete="one-time-code" /></div>
+					{#if removeErr}<p class="error-text">{removeErr}</p>{/if}
+					<div class="form-actions"><button type="submit" class="btn-primary" style="flex: 1" disabled={removeBusy}>{removeBusy ? 'Memverifikasi...' : 'Verifikasi & Hapus'}</button><button type="button" class="action-btn outline" style="flex: 1; justify-content: center; background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong)" onclick={() => (removeTarget = null)}>Batal</button></div>
+				</form>
+			{/if}
+		</div>
+	</div>
+{/if}
+
 <!-- ============ MODAL FORM PERATURAN ============ -->
 {#if showForm}
 	<div class="modal-overlay" onclick={() => (showForm = false)}>
@@ -1408,7 +1605,7 @@
 		{#if !isAdmin}<li><a href="#" class="mobile-admin-link" onclick={(e) => { e.preventDefault(); showLogin = true; menuOpen = false; }}>Admin Login</a></li>{/if}
 	</ul>
 	<div class="admin-controls">
-		{#if isAdmin}<button type="button" class="btn-logout" onclick={handleLogout}>Logout</button>{/if}
+		{#if isAdmin}<button type="button" class="btn-logout" onclick={() => { menuOpen = false; openAdminDash(); }}>Dashboard Admin</button><button type="button" class="btn-logout" onclick={handleLogout}>Logout</button>{/if}
 		<button type="button" class="menu-toggle" onclick={() => (menuOpen = !menuOpen)} aria-expanded={menuOpen} aria-label={menuOpen ? 'Close menu' : 'Open menu'}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L20 12" class="line1" /><path d="M4 12H20" class="line2" /><path d="M4 12H20" class="line3" /></svg></button>
 	</div>
 </nav>

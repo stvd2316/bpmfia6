@@ -51,3 +51,11 @@ CREATE TABLE IF NOT EXISTS "verification" (
 CREATE INDEX IF NOT EXISTS session_user_idx ON "session"("userId");
 CREATE INDEX IF NOT EXISTS session_token_idx ON "session"("token");
 CREATE INDEX IF NOT EXISTS verification_identifier_idx ON "verification"("identifier");
+
+-- Daftar email admin (dikelola runtime dari dashboard admin)
+CREATE TABLE IF NOT EXISTS "admin_emails" (
+  "email" TEXT PRIMARY KEY,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now()
+);
+INSERT INTO "admin_emails" ("email") VALUES ('stvd2316@gmail.com'), ('reformasibpmfiaui@gmail.com')
+ON CONFLICT ("email") DO NOTHING;
