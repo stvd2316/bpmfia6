@@ -1298,7 +1298,7 @@
 {#if viewingImageUrl}
 	<div class="image-viewer-overlay">
 		<div class="pdf-viewer-header">
-			<span class="pdf-viewer-title">Gambar Acara</span>
+			<span class="pdf-viewer-title">Gambar</span>
 			<button type="button" class="pdf-viewer-close" onclick={() => (viewingImageUrl = null)}>Tutup (X)</button>
 		</div>
 		<div class="image-viewer-body"><img src={proxyUrl(viewingImageUrl)} alt="Gambar acara" loading="lazy" /></div>
@@ -1503,7 +1503,9 @@
 								<span class="berita-pdf-label">Lihat Dokumen PDF {idx + 1}</span>
 							</a>
 						{:else}
-							<div class="berita-image-item"><img src={proxyUrl(url)} alt="Gambar Berita {idx + 1}" loading="lazy" /></div>
+							<a href="#" onclick={(e) => { e.preventDefault(); openImage(url); }} class="berita-image-item" aria-label="Perbesar gambar">
+								<img src={proxyUrl(url)} alt="Gambar Berita {idx + 1}" loading="lazy" />
+							</a>
 						{/if}
 					{/each}
 				</div>

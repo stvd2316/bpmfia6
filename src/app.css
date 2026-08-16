@@ -303,7 +303,8 @@ body {
 .berita-detail-date { font-family: var(--font-body); color: var(--mute); margin-bottom: 32px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
 .berita-detail-content { font-family: var(--font-body); font-size: 16px; line-height: 1.8; color: var(--body); margin-bottom: 32px; white-space: pre-wrap; word-break: break-word; }
 .berita-images-grid { display: flex; flex-direction: column; gap: 24px; margin-top: 32px; }
-.berita-image-item { width: 100%; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 8px 24px rgba(10, 10, 12, 0.12); }
+.berita-image-item { display: block; width: 100%; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 8px 24px rgba(10, 10, 12, 0.12); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+.berita-image-item:hover { transform: scale(1.005); box-shadow: 0 12px 32px rgba(255, 209, 85, 0.25), 0 10px 26px rgba(10, 10, 12, 0.14); }
 .berita-image-item img { width: 100%; height: auto; display: block; }
 /* Thumbnail PDF berita: halaman pertama, rasio asli (A4), klik → viewer.
    Lebar = 100% — DISAMAKAN dengan preview gambar berita */
