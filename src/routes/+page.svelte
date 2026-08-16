@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase';
+	import { authClient, sendAdminOtp, verifyAdminOtp } from '$lib/auth-client';
+	import { isAdminEmail } from '$lib/adminEmails';
 	import LocalImagePreview from '$lib/components/LocalImagePreview.svelte';
 	import TextWithLinks from '$lib/components/TextWithLinks.svelte';
 	import GalleryCarousel from '$lib/components/GalleryCarousel.svelte';
@@ -30,9 +32,13 @@
 	// Admin
 	let isAdmin = $state(false);
 	let showLogin = $state(false);
-	let username = $state('');
-	let password = $state('');
-	let loginError = $state('');
+	// Login admin: email + OTP (Better Auth)
+	let adminEmail = $state('');
+	let adminOtp = $state('');
+	let adminStep = $state<'email' | 'otp'>('email');
+	let adminAuthError = $state('');
+	let adminBusy = $state(false);
+	let showLogoutConfirm = $state(false);
 
 	// Form Peraturan
 	let showForm = $state(false);
@@ -177,6 +183,7 @@
 				}));
 		};
 		fetchAcara();
+		checkAdminSession();
 
 		const channel = supabase
 			.channel('custom-all-channel')
@@ -610,34 +617,93 @@
 		return `${day} ${months[monthIndex]} ${year}`;
 	};
 
-	// ================= LOGIN =================
+	// ================= LOGIN ADMIN (EMAIL + OTP — Better Auth) =================
+	// Cookie indikator sesi browser: tanpa masa berlaku (session cookie) →
+	// otomatis HAPUS saat browser ditutup. Kalau sesi server masih ada tapi
+	// cookie indikator hilang = browser baru dibuka → logout otomatis.
+	const ADMIN_LIVE_COOKIE = 'bpm_admin_live=1; path=/; SameSite=Lax';
 
-	const handleLogin = async (e: SubmitEvent) => {
-		e.preventDefault();
-		loginError = '';
+	const checkAdminSession = async () => {
 		try {
-			const res = await fetch('/api/admin-login', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ username, password })
-			});
-			const data = await res.json();
-			if (data.success) {
-				isAdmin = true;
-				showLogin = false;
-				username = '';
-				password = '';
-				loginError = '';
+			const { data } = await authClient.getSession();
+			const hasSession = !!(data?.session && data?.user);
+			const hasLiveCookie = document.cookie.includes('bpm_admin_live=1');
+			if (hasSession && isAdminEmail(data?.user?.email)) {
+				if (!hasLiveCookie) {
+					// Browser baru dibuka (cookie session hilang saat tutup) → logout server
+					await authClient.signOut();
+					isAdmin = false;
+				} else {
+					isAdmin = true;
+				}
 			} else {
-				loginError = data.message || 'Username atau password salah!';
+				isAdmin = false;
 			}
-		} catch (err) {
-			loginError = 'Terjadi kesalahan jaringan saat login.';
+		} catch {
+			isAdmin = false;
 		}
 	};
+
+	const handleAdminSendOtp = async (e: SubmitEvent) => {
+		e.preventDefault();
+		adminAuthError = '';
+		if (!isAdminEmail(adminEmail)) {
+			adminAuthError = 'Email tidak terdaftar sebagai admin.';
+			return;
+		}
+		adminBusy = true;
+		try {
+			const res = await sendAdminOtp(adminEmail);
+			if (res.error) {
+				adminAuthError = res.error.message || 'Gagal mengirim kode OTP.';
+			} else {
+				adminStep = 'otp';
+				adminOtp = '';
+			}
+		} catch {
+			adminAuthError = 'Terjadi kesalahan jaringan saat mengirim OTP.';
+		}
+		adminBusy = false;
+	};
+
+	const handleAdminVerifyOtp = async (e: SubmitEvent) => {
+		e.preventDefault();
+		adminAuthError = '';
+		adminBusy = true;
+		try {
+			const res = await verifyAdminOtp(adminEmail, adminOtp);
+			if (res.error) {
+				adminAuthError = res.error.message || 'Kode OTP salah atau sudah kedaluwarsa.';
+				adminBusy = false;
+				return;
+			}
+			isAdmin = true;
+			document.cookie = ADMIN_LIVE_COOKIE;
+			showLogin = false;
+			adminStep = 'email';
+			adminEmail = '';
+			adminOtp = '';
+			adminAuthError = '';
+		} catch {
+			adminAuthError = 'Terjadi kesalahan jaringan saat verifikasi OTP.';
+		}
+		adminBusy = false;
+	};
+
 	const handleLogout = () => {
+		showLogoutConfirm = true;
+	};
+
+	const confirmLogout = async () => {
+		showLogoutConfirm = false;
 		isAdmin = false;
 		menuOpen = false;
+		try {
+			await authClient.signOut();
+		} catch {
+			/* tetap logout lokal */
+		}
+		document.cookie = 'bpm_admin_live=1; path=/; SameSite=Lax; Max-Age=0';
 	};
 
 	// ================= FORM PERATURAN =================
@@ -1111,12 +1177,31 @@
 	<div class="modal-overlay" onclick={() => (showLogin = false)}>
 		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
 			<h2 class="modal-title">Login Admin</h2>
-			<form onsubmit={handleLogin}>
-				<div class="form-group"><label class="form-label">Username</label><input type="text" class="form-input" value={username} oninput={(e) => (username = val(e))} /></div>
-				<div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" value={password} oninput={(e) => (password = val(e))} /></div>
-				{#if loginError}<p class="error-text">{loginError}</p>{/if}
-				<div class="form-actions"><button type="submit" class="btn-primary" style="flex: 1">Login</button><button type="button" class="action-btn outline" style="flex: 1; justify-content: center; background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong)" onclick={() => (showLogin = false)}>Batal</button></div>
-			</form>
+			{#if adminStep === 'email'}
+				<form onsubmit={handleAdminSendOtp}>
+					<div class="form-group"><label class="form-label">Email Admin</label><input type="email" class="form-input" placeholder="nama@email.com" value={adminEmail} oninput={(e) => (adminEmail = val(e))} required autocomplete="email" /></div>
+					<p class="admin-otp-hint">Kode OTP 6 digit akan dikirim ke email yang terdaftar.</p>
+					{#if adminAuthError}<p class="error-text">{adminAuthError}</p>{/if}
+					<div class="form-actions"><button type="submit" class="btn-primary" style="flex: 1" disabled={adminBusy}>{adminBusy ? 'Mengirim...' : 'Kirim Kode OTP'}</button><button type="button" class="action-btn outline" style="flex: 1; justify-content: center; background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong)" onclick={() => (showLogin = false)}>Batal</button></div>
+				</form>
+			{:else}
+				<form onsubmit={handleAdminVerifyOtp}>
+					<p class="admin-otp-hint">Kode OTP dikirim ke <strong style="color: var(--ink)">{adminEmail}</strong> — berlaku 5 menit.</p>
+					<div class="form-group"><label class="form-label">Kode OTP (6 digit)</label><input type="text" class="form-input" inputmode="numeric" maxlength="6" placeholder="000000" value={adminOtp} oninput={(e) => (adminOtp = val(e).replace(/\D/g, ''))} required autocomplete="one-time-code" /></div>
+					{#if adminAuthError}<p class="error-text">{adminAuthError}</p>{/if}
+					<div class="form-actions"><button type="submit" class="btn-primary" style="flex: 1" disabled={adminBusy}>{adminBusy ? 'Memverifikasi...' : 'Verifikasi & Masuk'}</button><button type="button" class="action-btn outline" style="flex: 1; justify-content: center; background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong)" onclick={() => { adminStep = 'email'; adminOtp = ''; adminAuthError = ''; }}>← Ganti Email</button></div>
+				</form>
+			{/if}
+		</div>
+	</div>
+{/if}
+
+{#if showLogoutConfirm}
+	<div class="modal-overlay" onclick={() => (showLogoutConfirm = false)}>
+		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
+			<h2 class="modal-title">Konfirmasi Logout</h2>
+			<p style="font-family: var(--font-body); color: var(--body); margin-bottom: 24px; line-height: 1.6;">Yakin ingin keluar dari mode Admin? Kamu akan diminta kode OTP lagi untuk masuk kembali.</p>
+			<div class="form-actions"><button type="button" class="btn-primary" style="flex: 1" onclick={confirmLogout}>Ya, Logout</button><button type="button" class="action-btn outline" style="flex: 1; justify-content: center; background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong)" onclick={() => (showLogoutConfirm = false)}>Batal</button></div>
 		</div>
 	</div>
 {/if}
