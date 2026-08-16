@@ -312,6 +312,12 @@ body {
 .berita-pdf-thumb:hover { transform: scale(1.02); box-shadow: 0 12px 32px rgba(255, 209, 85, 0.25), 0 10px 26px rgba(10, 10, 12, 0.14); }
 .berita-pdf-thumb img { width: 100%; height: auto; display: block; }
 .berita-pdf-label { position: absolute; inset-inline: 0; bottom: 0; padding: 22px 12px 10px; background: linear-gradient(180deg, transparent, rgba(5, 5, 8, 0.78)); color: var(--on-dark); font-family: var(--font-heading); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; pointer-events: none; }
+/* Preview PDF peraturan: thumbnail halaman pertama (tajam 900px), klik → viewer fullview.
+   Lebar maks 800px (sama dengan container berita), centered di layout */
+.peraturan-pdf-preview { display: block; width: min(100%, 800px); margin: 0 auto 48px; border-radius: var(--radius-lg); overflow: hidden; position: relative; box-shadow: 0 8px 24px rgba(10, 10, 12, 0.12); border: 1px solid rgba(10, 10, 12, 0.08); transition: transform 0.2s, box-shadow 0.2s; }
+.peraturan-pdf-preview:hover { transform: scale(1.005); box-shadow: 0 12px 32px rgba(255, 209, 85, 0.25), 0 10px 26px rgba(10, 10, 12, 0.14); }
+.peraturan-pdf-preview img { width: 100%; height: auto; display: block; }
+.peraturan-pdf-label { position: absolute; inset-inline: 0; bottom: 0; padding: 22px 12px 10px; background: linear-gradient(180deg, transparent, rgba(5, 5, 8, 0.78)); color: var(--on-dark); font-family: var(--font-heading); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; pointer-events: none; }
 
 /* ========================================= */
 /* MODAL & FORM                              */

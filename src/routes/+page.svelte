@@ -1576,9 +1576,14 @@
 				<div class="info-row"><div class="info-label">Status</div><div class="info-value"><span class="status-badge {selectedPeraturan.status === 'Berlaku' ? 'status-berlaku' : selectedPeraturan.status === 'Dicabut' ? 'status-dicabut' : 'status-diubah'}">{selectedPeraturan.status}</span></div></div>
 			</div>
 			<div class="action-buttons">
-				<button type="button" class="action-btn primary" disabled={!selectedPeraturan.pdf_url} onclick={() => openPdf(selectedPeraturan.pdf_url)}>View Document</button>
 				<button type="button" class="action-btn primary" disabled={!selectedPeraturan.pdf_url} onclick={() => handleDownload(selectedPeraturan.pdf_url, selectedPeraturan.judul + '.pdf')}>Download</button>
 			</div>
+			{#if selectedPeraturan.pdf_url}
+				<a href="#" onclick={(e) => { e.preventDefault(); openPdf(selectedPeraturan.pdf_url); }} class="peraturan-pdf-preview" aria-label="Lihat dokumen PDF">
+					<PdfThumbnail url={proxyUrl(selectedPeraturan.pdf_url)} />
+					<span class="peraturan-pdf-label">Lihat Dokumen PDF</span>
+				</a>
+			{/if}
 			<h2 class="sub-heading">PERUBAHAN PERATURAN TERBARU</h2>
 			{#if selectedPeraturan.perubahan_tipe}<p class="amendment-text"><strong>{selectedPeraturan.perubahan_tipe}:</strong> {selectedPeraturan.perubahan_teks || '-'}</p>{:else}<p class="amendment-text" style="color: var(--mute)">Belum ada perubahan untuk dokumen ini.</p>{/if}
 		</div>
