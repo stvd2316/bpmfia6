@@ -9,21 +9,37 @@
 
 	let imgUrl = $state<string | null>(null);
 	let failed = $state(false);
-	let pdfjs: typeof import('pdfjs-dist') | null = null;
 
 	onMount(async () => {
 		try {
 			const mod = await import('pdfjs-dist');
-			const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
-			mod.GlobalWorkerOptions.workerSrc = worker.default;
-			pdfjs = mod;
-			await renderThumb(url);
+			// iOS Safari (terutama 15.x): `new Worker(url, {type:'module'})` yang
+			// dipakai pdfjs sering GAGAL di iPhone (thumbnail tidak muncul).
+			// Solusi: sembunyikan Worker sementara → pdfjs otomatis memakai
+			// 'fake worker' (render di main thread). Worker dikembalikan setelah
+			// selesai agar EmbedPDF viewer tetap bisa memakai worker.
+			const isIOS =
+				/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+				(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+			if (isIOS) {
+				const savedWorker = (window as any).Worker;
+				(window as any).Worker = undefined;
+				try {
+					await renderThumb(url, mod);
+				} finally {
+					(window as any).Worker = savedWorker;
+				}
+			} else {
+				const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+				mod.GlobalWorkerOptions.workerSrc = worker.default;
+				await renderThumb(url, mod);
+			}
 		} catch {
 			failed = true;
 		}
 	});
 
-	async function renderThumb(u: string) {
+	async function renderThumb(u: string, pdfjs: typeof import('pdfjs-dist')) {
 		if (!pdfjs) return;
 		const task = pdfjs.getDocument({ url: u });
 		const doc = await task.promise;
