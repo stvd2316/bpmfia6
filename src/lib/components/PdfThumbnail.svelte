@@ -13,7 +13,12 @@
 	onMount(async () => {
 		try {
 			const mod = await import('pdfjs-dist');
-			const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+			// ?worker&url: Vite mem-BUNDLE & TRANSPILE kode worker (target safari15).
+			// Penting: ?url biasa menyalin file .mjs asli pdfjs MENTAH (tidak
+			// di-transpile) — berisi sintaks modern (static blocks dll.) yang
+			// TIDAK bisa di-parse Safari 15.8 → error 'Unexpected token {' di
+			// worker maupun fake worker (terbukti via halaman /diag di iPhone).
+			const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?worker&url');
 			mod.GlobalWorkerOptions.workerSrc = worker.default;
 			try {
 				await renderThumb(url, mod);

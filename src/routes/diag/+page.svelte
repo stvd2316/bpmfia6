@@ -68,9 +68,11 @@
 			try {
 				const mod = await import('pdfjs-dist');
 				log('11. pdfjs import: OK (v' + (mod as any).version + ')');
-				const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+				// ?worker&url: Vite transpile kode worker (target safari15) —
+				// ?url mentah berisi sintaks yang gagal di Safari 15.8
+				const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?worker&url');
 				mod.GlobalWorkerOptions.workerSrc = worker.default;
-				log('11b. workerSrc di-set: OK');
+				log('11b. workerSrc di-set: OK (' + worker.default.slice(-30) + ')');
 				// Percobaan 1: worker normal
 				try {
 					const task = mod.getDocument({ url: '/api/download?url=' + encodeURIComponent(pdfUrl) });
