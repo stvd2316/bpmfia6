@@ -1385,6 +1385,7 @@
 
 	<section class="section" id="iss">
 		<div class="section-header"><h2>Integrated Scheduling System</h2><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh ORMAWA FIA UI</p></div>
+		<p class="fullview-guide" style="margin-top: -32px">Klik pada gambar/pdf untuk melihat dalam mode layar penuh</p>
 		<div class="iss-container">
 			<div class="calendar-header"><div class="calendar-title">{currentDate ? `${monthsID[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Memuat Kalender...'}</div><div class="calendar-nav"><button type="button" class="cal-nav-btn" onclick={handlePrevMonth}>&lt;</button><button type="button" class="cal-nav-btn" onclick={handleNextMonth}>&gt;</button></div></div>
 			<div class="calendar-grid">
@@ -1491,6 +1492,7 @@
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goBack}>← Kembali ke Daftar Berita</button>
 		<div class="berita-detail-container">
+			<p class="fullview-guide">Klik pada gambar/pdf untuk melihat dalam mode layar penuh</p>
 			<h1 class="berita-detail-title">{selectedBerita.judul}</h1>
 			<div class="berita-detail-date">{formatTanggal(selectedBerita.tgl_terbit)}</div>
 			<div class="berita-detail-content"><TextWithLinks text={selectedBerita.isi} /></div>
@@ -1565,6 +1567,7 @@
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goBack}>← Kembali ke Daftar Peraturan</button>
 		<div class="detail-layout">
+			<p class="fullview-guide">Klik pada gambar/pdf untuk melihat dalam mode layar penuh</p>
 			<h1 class="detail-title">{selectedPeraturan.judul}</h1>
 			<div class="info-box">
 				<div class="info-row"><div class="info-label">Judul</div><div class="info-value">{selectedPeraturan.judul}</div></div>
@@ -1575,15 +1578,15 @@
 				<div class="info-row"><div class="info-label">Tanggal Berlaku</div><div class="info-value">{formatTanggal(selectedPeraturan.tgl_berlaku)}</div></div>
 				<div class="info-row"><div class="info-label">Status</div><div class="info-value"><span class="status-badge {selectedPeraturan.status === 'Berlaku' ? 'status-berlaku' : selectedPeraturan.status === 'Dicabut' ? 'status-dicabut' : 'status-diubah'}">{selectedPeraturan.status}</span></div></div>
 			</div>
-			<div class="action-buttons">
-				<button type="button" class="action-btn primary" disabled={!selectedPeraturan.pdf_url} onclick={() => handleDownload(selectedPeraturan.pdf_url, selectedPeraturan.judul + '.pdf')}>Download</button>
-			</div>
 			{#if selectedPeraturan.pdf_url}
 				<a href="#" onclick={(e) => { e.preventDefault(); openPdf(selectedPeraturan.pdf_url); }} class="peraturan-pdf-preview" aria-label="Lihat dokumen PDF">
 					<PdfThumbnail url={proxyUrl(selectedPeraturan.pdf_url)} />
 					<span class="peraturan-pdf-label">Lihat Dokumen PDF</span>
 				</a>
 			{/if}
+			<div class="action-buttons">
+				<button type="button" class="action-btn primary" disabled={!selectedPeraturan.pdf_url} onclick={() => handleDownload(selectedPeraturan.pdf_url, selectedPeraturan.judul + '.pdf')}>Download</button>
+			</div>
 			<h2 class="sub-heading">PERUBAHAN PERATURAN TERBARU</h2>
 			{#if selectedPeraturan.perubahan_tipe}<p class="amendment-text"><strong>{selectedPeraturan.perubahan_tipe}:</strong> {selectedPeraturan.perubahan_teks || '-'}</p>{:else}<p class="amendment-text" style="color: var(--mute)">Belum ada perubahan untuk dokumen ini.</p>{/if}
 		</div>
