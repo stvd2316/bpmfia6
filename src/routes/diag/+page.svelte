@@ -68,9 +68,8 @@
 			try {
 				const mod = await import('pdfjs-dist');
 				log('11. pdfjs import: OK (v' + (mod as any).version + ')');
-				// ?worker&url: Vite transpile kode worker (target safari15) —
-				// ?url mentah berisi sintaks yang gagal di Safari 15.8
-				const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?worker&url');
+				// Shim worker: bundle + transpile + polyfill di KONTEKS worker
+				const worker = await import('$lib/pdfWorkerShim?worker&url');
 				mod.GlobalWorkerOptions.workerSrc = worker.default;
 				log('11b. workerSrc di-set: OK (' + worker.default.slice(-30) + ')');
 				// Percobaan 1: worker normal
