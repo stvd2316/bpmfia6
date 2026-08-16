@@ -261,11 +261,12 @@ body {
 .event-meta strong { color: var(--ink); font-weight: 700; }
 .no-events { text-align: center; color: var(--mute); font-style: italic; padding: 16px; }
 .add-event-btn { margin-top: 16px; width: 100%; }
-.event-files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 16px; }
-.event-file-link { display: block; width: 100%; aspect-ratio: 1; border: 1px solid rgba(10, 10, 12, 0.1); border-radius: var(--radius-md); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(10, 10, 12, 0.08); }
-.event-file-link:hover { transform: scale(1.03); box-shadow: 0 8px 22px rgba(10, 10, 12, 0.16); }
-.event-file-link img { width: 100%; height: 100%; object-fit: cover; }
-.event-file-link .pdf-icon { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8f8f8, #e4e4e4); color: #333; font-size: 12px; font-weight: 700; text-align: center; }
+.event-files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-top: 16px; }
+.event-file-link { display: block; border: 1px solid rgba(10, 10, 12, 0.1); border-radius: var(--radius-md); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(10, 10, 12, 0.08); background: var(--canvas); }
+.event-file-link:hover { transform: scale(1.03); box-shadow: 0 8px 24px rgba(255, 209, 85, 0.25), 0 8px 22px rgba(10, 10, 12, 0.14); }
+/* Preview gambar: TIDAK dicrop kotak — tampil penuh sesuai rasio asli */
+.event-file-link img { width: 100%; height: auto; display: block; }
+.event-file-link .pdf-icon { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8f8f8, #e4e4e4); color: #333; font-size: 12px; font-weight: 700; text-align: center; }
 
 /* ========================================= */
 /* DETAIL PERATURAN & BERITA                 */
@@ -354,6 +355,13 @@ body {
    di-stretch penuh: wrapper 100% + custom element display:block flex:1 */
 .pdf-container > div { width: 100%; height: 100%; display: flex; flex-direction: column; }
 .pdf-container embedpdf-container { display: block; flex: 1 1 auto; min-height: 0; width: 100%; }
+
+/* ========================================= */
+/* IMAGE VIEWER — overlay lebar (seperti PDF) */
+/* ========================================= */
+.image-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 8, 0.97); z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; }
+.image-viewer-body { width: 100%; height: 100%; flex-grow: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.image-viewer-body img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: var(--radius-md); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); }
 
 /* ========================================= */
 /* PAGINATION                                */

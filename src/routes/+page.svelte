@@ -118,6 +118,7 @@
 	let totalBeritaItems = $state(0);
 	let loadingBerita = $state(false);
 	let viewingPdfUrl = $state<string | null>(null);
+	let viewingImageUrl = $state<string | null>(null);
 
 	// ================= DERIVED =================
 
@@ -1098,6 +1099,10 @@
 			});
 		}
 	};
+
+	const openImage = (url: string) => {
+		viewingImageUrl = url;
+	};
 </script>
 
 <!-- ============ MODAL LOGIN ============ -->
@@ -1289,6 +1294,16 @@
 	</div>
 {/if}
 
+{#if viewingImageUrl}
+	<div class="image-viewer-overlay">
+		<div class="pdf-viewer-header">
+			<span class="pdf-viewer-title">Gambar Acara</span>
+			<button type="button" class="pdf-viewer-close" onclick={() => (viewingImageUrl = null)}>Tutup (X)</button>
+		</div>
+		<div class="image-viewer-body"><img src={proxyUrl(viewingImageUrl)} alt="Gambar acara" loading="lazy" /></div>
+	</div>
+{/if}
+
 <!-- ============ NAVBAR ============ -->
 <nav
 	class="navbar {scrolled || showAllPeraturan || selectedPeraturan || showAboutUs || showStatusIkm || showAllBerita || selectedBerita ? 'scrolled' : ''} {(showAllPeraturan || selectedPeraturan || showAboutUs || showStatusIkm || showAllBerita || selectedBerita) ? 'page-peraturan' : ''}"
@@ -1410,7 +1425,7 @@
 								{#if ev.file_urls && ev.file_urls.length > 0}
 									<div class="event-files-grid">
 										{#each ev.file_urls as url, idx (idx)}
-											<a href={url.endsWith('.pdf') ? '#' : proxyUrl(url)} target={url.endsWith('.pdf') ? undefined : '_blank'} rel="noopener noreferrer" class="event-file-link" onclick={(e) => { if (url.endsWith('.pdf')) { e.preventDefault(); openPdf(url); } }}>
+											<a href="#" rel="noopener noreferrer" class="event-file-link" onclick={(e) => { e.preventDefault(); if (url.endsWith('.pdf')) { openPdf(url); } else { openImage(url); } }}>
 												{#if url.endsWith('.pdf')}<div class="pdf-icon">PDF</div>{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" loading="lazy" />{/if}
 											</a>
 										{/each}
