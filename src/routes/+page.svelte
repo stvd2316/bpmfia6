@@ -148,7 +148,18 @@
 	let currentBeritaData = $derived(cachedBeritaPages[currentBeritaPage] ?? []);
 	let selectedDateAcara = $derived(
 		selectedCalendarDate
-			? acaraData.filter((ev) => ev.dateKey === formatDateKey(selectedCalendarDate!))
+			? acaraData
+					.filter((ev) => ev.dateKey === formatDateKey(selectedCalendarDate!))
+					.sort((a, b) => {
+						// Urutkan per waktu mulai (paling awal di atas). Acara tanpa
+						// waktu ditaruh di paling bawah.
+						const toMin = (t: string) => {
+							if (!t) return Number.MAX_SAFE_INTEGER;
+							const [h, m] = t.split(':').map(Number);
+							return h * 60 + (m || 0);
+						};
+						return toMin(a.waktuMulai) - toMin(b.waktuMulai);
+					})
 			: []
 	);
 	let mulaiH = $derived(acaraFormData.waktuMulai ? acaraFormData.waktuMulai.split(':')[0] : '');
