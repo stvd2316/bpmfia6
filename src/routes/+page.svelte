@@ -1709,7 +1709,8 @@
 				{/if}
 			</div>
 			<div class="calendar-events">
-				{#if selectedCalendarDate}
+						{#if isAdmin}<button type="button" class="btn-primary add-event-btn" style="margin-bottom: 16px" onclick={openAddAcaraForm}>+ Tambah Acara Baru</button>{/if}
+						{#if selectedCalendarDate}
 					<h3 style="font-family: var(--font-heading); margin-bottom: 16px; text-transform: uppercase; font-size: 16px">Acara pada {selectedCalendarDate.getDate()} {monthsID[selectedCalendarDate.getMonth()]} {selectedCalendarDate.getFullYear()}</h3>
 					{#if selectedDateAcara.length > 0}
 						{#each selectedDateAcara as ev (ev.id)}
@@ -1742,14 +1743,12 @@
 					{:else}
 						<p class="no-events">Tidak ada acara pada tanggal ini.</p>
 					{/if}
-					{#if isAdmin}<button type="button" class="btn-primary add-event-btn" onclick={openAddAcaraForm}>+ Tambah Acara Baru</button>{/if}
-				{:else}
+					{:else}
 					<p class="no-events">Klik pada salah satu tanggal untuk melihat detail acara.</p>
-					{#if isAdmin}<button type="button" class="btn-primary add-event-btn" onclick={openAddAcaraForm}>+ Tambah Acara Baru</button>{/if}
 				{/if}
-			</div>
 		</div>
-	</section>
+	</div>
+</section>
 {:else if showAllBerita}
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goBack}>← Kembali ke Beranda</button>
