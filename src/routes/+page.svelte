@@ -424,6 +424,8 @@
 	// ================= NAVIGASI =================
 
 	const goToAllPeraturan = () => {
+		const cs = window.scrollY;
+		window.history.replaceState({ ...(window.history.state || {}), scroll: cs }, '', window.location.href);
 		showAllPeraturan = true;
 		showAboutUs = false;
 		showStatusIkm = false;
@@ -434,6 +436,8 @@
 		window.history.pushState({ page: 'all_peraturan' }, '', '#peraturan');
 	};
 	const goToAllBerita = () => {
+		const cs = window.scrollY;
+		window.history.replaceState({ ...(window.history.state || {}), scroll: cs }, '', window.location.href);
 		showAllBerita = true;
 		showAboutUs = false;
 		showStatusIkm = false;
