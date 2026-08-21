@@ -1643,7 +1643,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="btn-more-container"><button type="button" onclick={goToAllPeraturan} class="btn-primary">More</button></div>
+		<div class="btn-more-container"><button type="button" onclick={goToAllPeraturan} class="btn-primary">SELENGKAPNYA</button></div>
 	</section>
 
 	<section class="section" id="berita" style="background-color: var(--surface-soft)">
@@ -1663,7 +1663,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="btn-more-container"><button type="button" onclick={goToAllBerita} class="btn-primary">More</button></div>
+		<div class="btn-more-container"><button type="button" onclick={goToAllBerita} class="btn-primary">SELENGKAPNYA</button></div>
 	</section>
 
 	<section class="section" id="iss">
@@ -1924,7 +1924,7 @@
 				<a href="https://lin.ee/pteZwX4" target="_blank" rel="noopener noreferrer" title="Line"><img src="/assets/line.png" alt="Line" width="20" height="20" style="filter: brightness(0) invert(1)" /></a>
 			</div>
 		</div>
-		<div class="footer-links"><h4>Navigasi</h4><ul><li><a href="#" onclick={(e) => { e.preventDefault(); goToHome(); }}>Beranda</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAllPeraturan(); }}>Peraturan</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToBerita(); }}>Berita</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAboutUs(); }}>Tentang Kami</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToStatusIkm(); }}>Cek Status IKM</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToKontak(); }}>Kontak</a></li></ul></div>
+		<div class="footer-links"><h4>Navigasi</h4><ul><li><a href="#" onclick={(e) => { e.preventDefault(); goToHome(); }}>Beranda</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAllPeraturan(); }}>Peraturan</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAllBerita(); }}>Berita</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAboutUs(); }}>Tentang Kami</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToStatusIkm(); }}>Cek Status IKM</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToKontak(); }}>Kontak</a></li></ul></div>
 		<div class="footer-links"><h4>Kontak</h4><ul><li><a href="https://maps.app.goo.gl/EXW9DaKNgcBmMQ9p9" target="_blank" rel="noopener noreferrer">Gedung M FIA UI, Depok</a></li><li><a href="https://maps.app.goo.gl/J6nVMzbrYQbwysQCA" target="_blank" rel="noopener noreferrer">Gedung Baru FIA UI</a></li><li><a href="mailto:reformasibpmfiaui@gmail.com">reformasibpmfiaui@gmail.com</a></li></ul></div>
 	</div>
 	<div class="footer-bottom">BPM FIA UI 2026 #REFORM</div>
