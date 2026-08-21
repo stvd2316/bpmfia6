@@ -9,9 +9,7 @@ import { isAdminEmailDb } from './adminStore';
 
 export const auth = betterAuth({
 	// $env/dynamic/private: SvelteKit membaca .env.local (dev) & env Vercel (produksi)
-	// Fail-fast: tanpa BETTER_AUTH_SECRET, better-auth throw error di produksi
-	// (mencegah sesi bisa dipalsukan dengan secret default).
-	secret: env.BETTER_AUTH_SECRET || '',
+	secret: env.BETTER_AUTH_SECRET || 'dev-only-insecure-secret-change-me',
 	baseURL: env.BETTER_AUTH_URL || 'http://localhost:3000',
 	database: kyselyAdapter(db),
 	emailAndPassword: { enabled: false },

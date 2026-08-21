@@ -406,13 +406,15 @@
 			alert('Nilai harus berupa angka!');
 			return;
 		}
+		const newStatus = newNilai >= 85 ? 'AKTIF' : 'PASIF';
 		updatingIkm = true;
-		const { error } = await adminWrite({ action: 'ikm-update', no: item.id, nilai: newNilai });
+		const { error } = await supabase
+			.from('status_ikm_fia_ui')
+			.update({ Nilai: newNilai, Status: newStatus })
+			.eq('No', item.id);
 		if (error) alert('Gagal: ' + error.message);
 		else {
-			ikmData = ikmData.map((d) =>
-				d.id === item.id ? { ...d, nilai: newNilai, status: newNilai >= 85 ? 'AKTIF' : 'PASIF' } : d
-			);
+			ikmData = ikmData.map((d) => (d.id === item.id ? { ...d, nilai: newNilai, status: newStatus } : d));
 			editingIkmId = null;
 			editingNilai = '';
 		}
@@ -532,10 +534,6 @@
 		);
 		selectedBerita = item;
 		showAllBerita = false;
-		showAllPeraturan = false;
-		showAboutUs = false;
-		showStatusIkm = false;
-		selectedPeraturan = null;
 		window.scrollTo(0, 0);
 		window.history.pushState({ page: 'berita_detail', id: item.id }, '', `#berita/${item.id}`);
 	};
@@ -604,23 +602,6 @@
 	});
 
 	// ================= UTIL =================
-
-	// Semua operasi TULIS sekarang lewat endpoint server /api/admin-data
-	// (divalidasi sesi admin) — RLS database mengunci tulis anonim.
-	const adminWrite = async (body: Record<string, unknown>) => {
-		const res = await fetch('/api/admin-data', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(body)
-		});
-		const data = await res.json().catch(() => null);
-		if (!res.ok || !data?.ok) {
-			const msg =
-				res.status === 401 ? 'Sesi admin berakhir. Silakan login ulang.' : data?.error || 'Operasi gagal.';
-			return { error: { message: msg } };
-		}
-		return { data: data.data };
-	};
 
 	const formatTanggal = (dateString: string) => {
 		const months = [
@@ -903,7 +884,7 @@
 	};
 	const handleDelete = async (id: string) => {
 		if (window.confirm('Apakah Anda yakin ingin menghapus peraturan ini?')) {
-			const { error } = await adminWrite({ action: 'peraturan-delete', id });
+			const { error } = await supabase.from('peraturan').delete().eq('id', id);
 			if (error) alert('Gagal hapus: ' + error.message);
 			else {
 				fetchHomeData();
@@ -972,7 +953,7 @@
 			pdf_url: finalPdfUrl
 		};
 		if (editingId) {
-			const { error } = await adminWrite({ action: 'peraturan-update', id: editingId, ...payload });
+			const { error } = await supabase.from('peraturan').update(payload).eq('id', editingId);
 			if (error) formError = 'Gagal update: ' + error.message;
 			else {
 				showForm = false;
@@ -983,7 +964,7 @@
 				}
 			}
 		} else {
-			const { error } = await adminWrite({ action: 'peraturan-insert', ...payload });
+			const { error } = await supabase.from('peraturan').insert([payload]);
 			if (error) formError = 'Gagal tambah: ' + error.message;
 			else {
 				showForm = false;
@@ -1124,9 +1105,13 @@
 			file_urls: finalUrls
 		};
 		if (editingAcaraId) {
-			const { data, error } = await adminWrite({ action: 'acara-update', id: editingAcaraId, ...payload });
+			const { data, error } = await supabase
+				.from('iss_events')
+				.update(payload)
+				.eq('id', editingAcaraId)
+				.select();
 			if (error) alert('Gagal: ' + error.message);
-			else if (data && data[0]) {
+			else if (data) {
 				const n = data[0] as any;
 				acaraData = acaraData.map((ev) =>
 					ev.id === n.id
@@ -1147,9 +1132,9 @@
 				showAcaraForm = false;
 			}
 		} else {
-			const { data, error } = await adminWrite({ action: 'acara-insert', ...payload });
+			const { data, error } = await supabase.from('iss_events').insert([payload]).select();
 			if (error) alert('Gagal: ' + error.message);
-			else if (data && data[0]) {
+			else if (data) {
 				const n = data[0] as any;
 				acaraData = acaraData.some((e) => e.id === n.id)
 					? acaraData
@@ -1176,7 +1161,7 @@
 	};
 	const handleDeleteAcara = async (id: string) => {
 		if (window.confirm('Hapus acara?')) {
-			const { error } = await adminWrite({ action: 'acara-delete', id });
+			const { error } = await supabase.from('iss_events').delete().eq('id', id);
 			if (error) alert('Gagal: ' + error.message);
 			else acaraData = acaraData.filter((ev) => ev.id !== id);
 		}
@@ -1249,7 +1234,7 @@
 			file_urls: finalUrls
 		};
 		if (editingBeritaId) {
-			const { error } = await adminWrite({ action: 'berita-update', id: editingBeritaId, ...payload });
+			const { error } = await supabase.from('berita').update(payload).eq('id', editingBeritaId);
 			if (error) beritaFormError = 'Gagal update: ' + error.message;
 			else {
 				showBeritaForm = false;
@@ -1260,7 +1245,7 @@
 				}
 			}
 		} else {
-			const { error } = await adminWrite({ action: 'berita-insert', ...payload });
+			const { error } = await supabase.from('berita').insert([payload]);
 			if (error) beritaFormError = 'Gagal tambah: ' + error.message;
 			else {
 				showBeritaForm = false;
@@ -1275,7 +1260,7 @@
 	};
 	const handleDeleteBerita = async (id: string) => {
 		if (window.confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
-			const { error } = await adminWrite({ action: 'berita-delete', id });
+			const { error } = await supabase.from('berita').delete().eq('id', id);
 			if (error) alert('Gagal hapus: ' + error.message);
 			else {
 				fetchHomeData();

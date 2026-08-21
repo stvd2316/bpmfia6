@@ -5,10 +5,19 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { auth } from '$lib/server/auth';
-import { getAdminSession } from '$lib/server/adminGuard';
 import { listAdminEmails, addAdminEmail, removeAdminEmail, isAdminEmailDb } from '$lib/server/adminStore';
 
 const KALIMAT_KONFIRMASI = 'saya akan menghapus email berikut sebagai admin dan saya sudah memahaminya';
+
+async function getAdminSession(request: Request) {
+	const headers = new Headers(request.headers);
+	// better-auth membaca cookie dari header — Request sudah membawanya
+	const session = await auth.api.getSession({ headers });
+	if (!session || !session.user?.email || !(await isAdminEmailDb(session.user.email))) {
+		throw error(401, 'Tidak diizinkan — login admin diperlukan.');
+	}
+	return session;
+}
 
 export const GET: RequestHandler = async () => {
 	const list = await listAdminEmails();
