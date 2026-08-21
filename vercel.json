@@ -1,6 +1,19 @@
 {
 	"headers": [
 		{
+			"source": "/(.*)",
+			"headers": [
+				{ "key": "X-Content-Type-Options", "value": "nosniff" },
+				{ "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+				{ "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+				{ "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+				{
+					"key": "Content-Security-Policy",
+					"value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://fogkgkqnxpzedmtclhil.supabase.co wss://fogkgkqnxpzedmtclhil.supabase.co https://pub-7ec18d00d4304e1e8a6a088ae0601ced.r2.dev; frame-src 'self' blob:; worker-src 'self' blob:; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'"
+				}
+			]
+		},
+		{
 			"source": "/api/image",
 			"headers": [
 				{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
