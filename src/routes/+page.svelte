@@ -533,6 +533,11 @@
 			window.location.href
 		);
 		selectedBerita = item;
+		showAllBerita = false;
+		showAllPeraturan = false;
+		showAboutUs = false;
+		showStatusIkm = false;
+		selectedPeraturan = null;
 		window.scrollTo(0, 0);
 		window.history.pushState({ page: 'berita_detail', id: item.id }, '', `#berita/${item.id}`);
 	};
