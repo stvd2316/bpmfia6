@@ -167,6 +167,21 @@ export async function uploadThumbFile(name: string, blob: Blob): Promise<boolean
 	}
 }
 
+/** Hapus file + thumb-nya di R2 (dipakai saat hapus/ganti dokumen). Tidak pernah throw. */
+export async function deleteFilesAndThumbs(urls: (string | null | undefined)[]): Promise<void> {
+	const list = urls.filter((u): u is string => !!u);
+	if (list.length === 0) return;
+	try {
+		await fetch('/api/delete-files', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ urls: list })
+		});
+	} catch {
+		/* abaikan — DB tetap jadi sumber kebenaran */
+	}
+}
+
 // Guard agar tidak generate/upload ganda untuk file yang sama
 const inflight = new Set<string>();
 

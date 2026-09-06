@@ -1,0 +1,9 @@
+# Taste
+- Communicates in Indonesian; prefer responding/reporting in Indonesian. Confidence: 0.8
+- Prefers minimal, targeted changes — only fix/modify what was explicitly requested and never touch unrelated components ("jangan ubah komponen lain yang saya tidak minta"). Confidence: 0.8
+- Wants audit/analysis findings reported first without executing any fixes — asks to be told about problems ("cukup beritahu saja") and to decide which to address before the agent acts. Confidence: 0.8
+- Prefers simple, plain-language explanations of issues/behavior using everyday analogies rather than deep technical detail — asks for a simpler explanation when the assistant got too technical ("jelaskan lebih simpel"). Confidence: 0.7
+- Prefers UI copy/button labels in Indonesian rather than English (e.g., changing "MORE" to "SELENGKAPNYA" for all such buttons). Confidence: 0.5
+- Values technically accurate analysis: will verify agent's findings themselves (e.g., testing a feature) and corrects incorrect technical claims (e.g., a wrongly-reported broken filter vs. actual Svelte `$effect` behavior). Expects the agent to get framework behavior right rather than assert false conclusions. Confidence: 0.6
+- Wants stateful/SPA navigation UX: when leaving a page/section (e.g., clicking "SELENGKAPNYA") and returning to the Beranda, the app must restore the prior scroll position (back to the section where the click happened), not jump to the top. Values consistent navigation behavior across similar navigation buttons. Confidence: 0.7
+- Prefers key admin action buttons (e.g., "+ Tambah Acara Baru") placed in an always-visible, convenient location near the top of a list/context (just below the calendar, above the event listing) rather than buried at the bottom, so users don't have to scroll through long content to reach them. Confidence: 0.5

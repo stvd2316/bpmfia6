@@ -6,7 +6,7 @@
 	import TextWithLinks from '$lib/components/TextWithLinks.svelte';
 	import GalleryCarousel from '$lib/components/GalleryCarousel.svelte';
 	import ThumbImg from '$lib/components/ThumbImg.svelte';
-	import { thumbUrlFor, generateAndUploadThumb } from '$lib/thumb';
+	import { thumbUrlFor, generateAndUploadThumb, deleteFilesAndThumbs } from '$lib/thumb';
 	import PdfThumbnail from '$lib/components/PdfThumbnail.svelte';
 
 	// ================= STATE (port 1:1 dari useState page.tsx) =================
@@ -56,6 +56,17 @@
 	let removeMsg = $state('');
 	let removeErr = $state('');
 	let removeBusy = $state(false);
+
+	// Snapshot file saat form edit dibuka — untuk menghapus file yang diganti/dibuang
+	// dari R2 saat simpan berhasil (asli + thumb-nya).
+	let initialPdfUrl = $state<string | null>(null);
+	let initialBeritaFiles = $state<string[]>([]);
+	let initialAcaraFiles = $state<string[]>([]);
+
+	const cleanupReplacedFiles = (initial: (string | null)[], kept: (string | null)[]) => {
+		const removed = initial.filter((u): u is string => !!u && !kept.includes(u));
+		if (removed.length) void deleteFilesAndThumbs(removed);
+	};
 
 	// Form Peraturan
 	let showForm = $state(false);
@@ -878,6 +889,7 @@
 		};
 		pdfFile = null;
 		existingPdfUrl = null;
+		initialPdfUrl = null;
 		formError = '';
 		showForm = true;
 		menuOpen = false;
@@ -896,14 +908,18 @@
 		};
 		pdfFile = null;
 		existingPdfUrl = item.pdf_url || null;
+		initialPdfUrl = item.pdf_url || null;
 		formError = '';
 		showForm = true;
 	};
 	const handleDelete = async (id: string) => {
 		if (window.confirm('Apakah Anda yakin ingin menghapus peraturan ini?')) {
+			const { data: row } = await supabase.from('peraturan').select('pdf_url').eq('id', id).single();
 			const { error } = await supabase.from('peraturan').delete().eq('id', id);
 			if (error) alert('Gagal hapus: ' + error.message);
 			else {
+				// Hapus file asli + thumb-nya dari R2 (best-effort, tidak menghambat UI)
+				void deleteFilesAndThumbs([row?.pdf_url]);
 				fetchHomeData();
 				if (showAllPeraturan) {
 					cachedPages = {};
@@ -976,6 +992,7 @@
 			const { error } = await supabase.from('peraturan').update(payload).eq('id', editingId);
 			if (error) formError = 'Gagal update: ' + error.message;
 			else {
+				cleanupReplacedFiles([initialPdfUrl], [finalPdfUrl]);
 				showForm = false;
 				fetchHomeData();
 				if (showAllPeraturan) {
@@ -987,6 +1004,7 @@
 			const { error } = await supabase.from('peraturan').insert([payload]);
 			if (error) formError = 'Gagal tambah: ' + error.message;
 			else {
+				cleanupReplacedFiles([initialPdfUrl], [finalPdfUrl]);
 				showForm = false;
 				fetchHomeData();
 				if (showAllPeraturan) {
@@ -1048,6 +1066,7 @@
 		};
 		acaraFiles = [];
 		existingAcaraFiles = [];
+		initialAcaraFiles = [];
 		acaraFormError = '';
 		showAcaraForm = true;
 	};
@@ -1067,6 +1086,7 @@
 		};
 		acaraFiles = [];
 		existingAcaraFiles = item.file_urls || [];
+		initialAcaraFiles = [...(item.file_urls || [])];
 		acaraFormError = '';
 		showAcaraForm = true;
 	};
@@ -1154,6 +1174,7 @@
 							}
 						: ev
 				);
+				cleanupReplacedFiles(initialAcaraFiles, finalUrls);
 				showAcaraForm = false;
 			}
 		} else {
@@ -1179,6 +1200,7 @@
 							}
 						];
 				showAcaraForm = false;
+				cleanupReplacedFiles(initialAcaraFiles, finalUrls);
 				selectedCalendarDate = new Date(parseInt(dP[0]), parseInt(dP[1]) - 1, parseInt(dP[2]));
 			}
 		}
@@ -1186,9 +1208,13 @@
 	};
 	const handleDeleteAcara = async (id: string) => {
 		if (window.confirm('Hapus acara?')) {
+			const { data: row } = await supabase.from('iss_events').select('file_urls').eq('id', id).single();
 			const { error } = await supabase.from('iss_events').delete().eq('id', id);
 			if (error) alert('Gagal: ' + error.message);
-			else acaraData = acaraData.filter((ev) => ev.id !== id);
+			else {
+				void deleteFilesAndThumbs(row?.file_urls || []);
+				acaraData = acaraData.filter((ev) => ev.id !== id);
+			}
 		}
 	};
 
@@ -1199,6 +1225,7 @@
 		beritaFormData = { judul: '', isi: '', tgl_terbit: '' };
 		beritaFiles = [];
 		existingBeritaFiles = [];
+		initialBeritaFiles = [];
 		beritaFormError = '';
 		showBeritaForm = true;
 		menuOpen = false;
@@ -1208,6 +1235,7 @@
 		beritaFormData = { judul: item.judul, isi: item.isi, tgl_terbit: item.tgl_terbit };
 		beritaFiles = [];
 		existingBeritaFiles = item.file_urls || [];
+		initialBeritaFiles = [...(item.file_urls || [])];
 		beritaFormError = '';
 		showBeritaForm = true;
 	};
@@ -1267,6 +1295,7 @@
 			const { error } = await supabase.from('berita').update(payload).eq('id', editingBeritaId);
 			if (error) beritaFormError = 'Gagal update: ' + error.message;
 			else {
+				cleanupReplacedFiles(initialBeritaFiles, finalUrls);
 				showBeritaForm = false;
 				fetchHomeData();
 				if (showAllBerita) {
@@ -1278,6 +1307,7 @@
 			const { error } = await supabase.from('berita').insert([payload]);
 			if (error) beritaFormError = 'Gagal tambah: ' + error.message;
 			else {
+				cleanupReplacedFiles(initialBeritaFiles, finalUrls);
 				showBeritaForm = false;
 				fetchHomeData();
 				if (showAllBerita) {
@@ -1290,9 +1320,11 @@
 	};
 	const handleDeleteBerita = async (id: string) => {
 		if (window.confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
+			const { data: row } = await supabase.from('berita').select('file_urls').eq('id', id).single();
 			const { error } = await supabase.from('berita').delete().eq('id', id);
 			if (error) alert('Gagal hapus: ' + error.message);
 			else {
+				void deleteFilesAndThumbs(row?.file_urls || []);
 				fetchHomeData();
 				if (showAllBerita) {
 					cachedBeritaPages = {};
