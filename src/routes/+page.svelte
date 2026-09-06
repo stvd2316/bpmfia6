@@ -5,6 +5,8 @@
 	import LocalImagePreview from '$lib/components/LocalImagePreview.svelte';
 	import TextWithLinks from '$lib/components/TextWithLinks.svelte';
 	import GalleryCarousel from '$lib/components/GalleryCarousel.svelte';
+	import ThumbImg from '$lib/components/ThumbImg.svelte';
+	import { thumbUrlFor, generateAndUploadThumb } from '$lib/thumb';
 	import PdfThumbnail from '$lib/components/PdfThumbnail.svelte';
 
 	// ================= STATE (port 1:1 dari useState page.tsx) =================
@@ -148,7 +150,18 @@
 	let currentBeritaData = $derived(cachedBeritaPages[currentBeritaPage] ?? []);
 	let selectedDateAcara = $derived(
 		selectedCalendarDate
-			? acaraData.filter((ev) => ev.dateKey === formatDateKey(selectedCalendarDate!))
+			? acaraData
+					.filter((ev) => ev.dateKey === formatDateKey(selectedCalendarDate!))
+					.sort((a, b) => {
+						// Urutkan per waktu mulai (paling awal di atas). Acara tanpa
+						// waktu ditaruh di paling bawah.
+						const toMin = (t: string) => {
+							if (!t) return Number.MAX_SAFE_INTEGER;
+							const [h, m] = t.split(':').map(Number);
+							return h * 60 + (m || 0);
+						};
+						return toMin(a.waktuMulai) - toMin(b.waktuMulai);
+					})
 			: []
 	);
 	let mulaiH = $derived(acaraFormData.waktuMulai ? acaraFormData.waktuMulai.split(':')[0] : '');
@@ -424,6 +437,8 @@
 	// ================= NAVIGASI =================
 
 	const goToAllPeraturan = () => {
+		const cs = window.scrollY;
+		window.history.replaceState({ ...(window.history.state || {}), scroll: cs }, '', window.location.href);
 		showAllPeraturan = true;
 		showAboutUs = false;
 		showStatusIkm = false;
@@ -434,6 +449,8 @@
 		window.history.pushState({ page: 'all_peraturan' }, '', '#peraturan');
 	};
 	const goToAllBerita = () => {
+		const cs = window.scrollY;
+		window.history.replaceState({ ...(window.history.state || {}), scroll: cs }, '', window.location.href);
 		showAllBerita = true;
 		showAboutUs = false;
 		showStatusIkm = false;
@@ -533,6 +550,7 @@
 			window.location.href
 		);
 		selectedBerita = item;
+		showAllBerita = false;
 		window.scrollTo(0, 0);
 		window.history.pushState({ page: 'berita_detail', id: item.id }, '', `#berita/${item.id}`);
 	};
@@ -933,6 +951,9 @@
 		if (pdfFile) {
 			try {
 				finalPdfUrl = await uploadToR2(pdfFile);
+				// Opsi A: generate thumb kecil (600px) + upload ke R2 — fire-and-forget,
+				// kegagalan thumb tidak boleh menggagalkan simpan utama.
+				void generateAndUploadThumb(finalPdfUrl, pdfFile, 'pdf');
 			} catch (err: any) {
 				uploadingPdf = false;
 				formError = err.message;
@@ -1089,6 +1110,11 @@
 				return;
 			}
 			finalUrls = [...finalUrls, ...data.urls];
+			// Opsi A: thumb kecil per file (fire-and-forget, tidak menghambat simpan)
+			data.urls.forEach((u: string, i: number) => {
+				const f = acaraFiles[i];
+				if (f) void generateAndUploadThumb(u, f, f.type === 'application/pdf' ? 'pdf' : 'image');
+			});
 		}
 		const dP = acaraFormData.date.split('-');
 		const fK = `${parseInt(dP[2])}-${parseInt(dP[1])}-${dP[0]}`;
@@ -1225,6 +1251,11 @@
 				return;
 			}
 			finalUrls = [...finalUrls, ...data.urls];
+			// Opsi A: thumb kecil per file (fire-and-forget, tidak menghambat simpan)
+			data.urls.forEach((u: string, i: number) => {
+				const f = beritaFiles[i];
+				if (f) void generateAndUploadThumb(u, f, f.type === 'application/pdf' ? 'pdf' : 'image');
+			});
 		}
 		const payload = {
 			judul: beritaFormData.judul,
@@ -1642,7 +1673,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="btn-more-container"><button type="button" onclick={goToAllPeraturan} class="btn-primary">More</button></div>
+		<div class="btn-more-container"><button type="button" onclick={goToAllPeraturan} class="btn-primary">SELENGKAPNYA</button></div>
 	</section>
 
 	<section class="section" id="berita" style="background-color: var(--surface-soft)">
@@ -1662,7 +1693,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="btn-more-container"><button type="button" onclick={goToAllBerita} class="btn-primary">More</button></div>
+		<div class="btn-more-container"><button type="button" onclick={goToAllBerita} class="btn-primary">SELENGKAPNYA</button></div>
 	</section>
 
 	<section class="section" id="iss">
@@ -1693,7 +1724,8 @@
 				{/if}
 			</div>
 			<div class="calendar-events">
-				{#if selectedCalendarDate}
+						{#if isAdmin}<button type="button" class="btn-primary add-event-btn" style="margin-bottom: 16px" onclick={openAddAcaraForm}>+ Tambah Acara Baru</button>{/if}
+						{#if selectedCalendarDate}
 					<h3 style="font-family: var(--font-heading); margin-bottom: 16px; text-transform: uppercase; font-size: 16px">Acara pada {selectedCalendarDate.getDate()} {monthsID[selectedCalendarDate.getMonth()]} {selectedCalendarDate.getFullYear()}</h3>
 					{#if selectedDateAcara.length > 0}
 						{#each selectedDateAcara as ev (ev.id)}
@@ -1710,7 +1742,7 @@
 									<div class="event-files-grid">
 										{#each ev.file_urls as url, idx (idx)}
 											<a href="#" rel="noopener noreferrer" class="event-file-link" onclick={(e) => { e.preventDefault(); if (url.endsWith('.pdf')) { openPdf(url); } else { openImage(url); } }}>
-												{#if url.endsWith('.pdf')}<PdfThumbnail url={proxyUrl(url)} />{:else}<img src={proxyUrl(url)} alt="File {idx + 1}" loading="lazy" />{/if}
+												{#if url.endsWith('.pdf')}<PdfThumbnail url={proxyUrl(url)} thumb={thumbUrlFor(url)} backfill={isAdmin} />{:else}<ThumbImg url={url} alt="File {idx + 1}" backfill={isAdmin} />{/if}
 											</a>
 										{/each}
 									</div>
@@ -1726,14 +1758,12 @@
 					{:else}
 						<p class="no-events">Tidak ada acara pada tanggal ini.</p>
 					{/if}
-					{#if isAdmin}<button type="button" class="btn-primary add-event-btn" onclick={openAddAcaraForm}>+ Tambah Acara Baru</button>{/if}
-				{:else}
+					{:else}
 					<p class="no-events">Klik pada salah satu tanggal untuk melihat detail acara.</p>
-					{#if isAdmin}<button type="button" class="btn-primary add-event-btn" onclick={openAddAcaraForm}>+ Tambah Acara Baru</button>{/if}
 				{/if}
-			</div>
 		</div>
-	</section>
+	</div>
+</section>
 {:else if showAllBerita}
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goBack}>← Kembali ke Beranda</button>
@@ -1783,12 +1813,12 @@
 					{#each selectedBerita.file_urls as url, idx (idx)}
 						{#if url.endsWith('.pdf')}
 							<a href="#" onclick={(e) => { e.preventDefault(); openPdf(url); }} class="berita-pdf-thumb">
-								<PdfThumbnail url={proxyUrl(url)} />
+								<PdfThumbnail url={proxyUrl(url)} thumb={thumbUrlFor(url)} backfill={isAdmin} />
 								<span class="berita-pdf-label">Lihat Dokumen PDF {idx + 1}</span>
 							</a>
-						{:else}
+							{:else}
 							<a href="#" onclick={(e) => { e.preventDefault(); openImage(url); }} class="berita-image-item" aria-label="Perbesar gambar">
-								<img src={proxyUrl(url)} alt="Gambar Berita {idx + 1}" loading="lazy" />
+								<ThumbImg url={url} alt="Gambar Berita {idx + 1}" backfill={isAdmin} />
 							</a>
 						{/if}
 					{/each}
@@ -1862,7 +1892,7 @@
 			</div>
 			{#if selectedPeraturan.pdf_url}
 				<a href="#" onclick={(e) => { e.preventDefault(); openPdf(selectedPeraturan.pdf_url); }} class="peraturan-pdf-preview" aria-label="Lihat dokumen PDF">
-					<PdfThumbnail url={proxyUrl(selectedPeraturan.pdf_url)} />
+					<PdfThumbnail url={proxyUrl(selectedPeraturan.pdf_url)} thumb={thumbUrlFor(selectedPeraturan.pdf_url)} backfill={isAdmin} />
 					<span class="peraturan-pdf-label">Lihat Dokumen PDF</span>
 				</a>
 			{/if}
@@ -1923,7 +1953,7 @@
 				<a href="https://lin.ee/pteZwX4" target="_blank" rel="noopener noreferrer" title="Line"><img src="/assets/line.png" alt="Line" width="20" height="20" style="filter: brightness(0) invert(1)" /></a>
 			</div>
 		</div>
-		<div class="footer-links"><h4>Navigasi</h4><ul><li><a href="#" onclick={(e) => { e.preventDefault(); goToHome(); }}>Beranda</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAllPeraturan(); }}>Peraturan</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToBerita(); }}>Berita</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAboutUs(); }}>TENTANG KAMI</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToStatusIkm(); }}>Cek Status IKM</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToKontak(); }}>Kontak</a></li></ul></div>
+		<div class="footer-links"><h4>Navigasi</h4><ul><li><a href="#" onclick={(e) => { e.preventDefault(); goToHome(); }}>Beranda</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAllPeraturan(); }}>Peraturan</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAllBerita(); }}>Berita</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToAboutUs(); }}>Tentang Kami</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToStatusIkm(); }}>Cek Status IKM</a></li><li><a href="#" onclick={(e) => { e.preventDefault(); goToKontak(); }}>Kontak</a></li></ul></div>
 		<div class="footer-links"><h4>Kontak</h4><ul><li><a href="https://maps.app.goo.gl/EXW9DaKNgcBmMQ9p9" target="_blank" rel="noopener noreferrer">Gedung M FIA UI, Depok</a></li><li><a href="https://maps.app.goo.gl/J6nVMzbrYQbwysQCA" target="_blank" rel="noopener noreferrer">Gedung Baru FIA UI</a></li><li><a href="mailto:reformasibpmfiaui@gmail.com">reformasibpmfiaui@gmail.com</a></li></ul></div>
 	</div>
 	<div class="footer-bottom">BPM FIA UI 2026 #REFORM</div>

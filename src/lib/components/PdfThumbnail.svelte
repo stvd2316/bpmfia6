@@ -1,83 +1,61 @@
 <script lang="ts">
 	// PdfThumbnail — pratinjau halaman PERTAMA PDF sebagai thumbnail (rasio asli,
-	// biasanya A4). Render via pdf.js (lazy import: hanya dimuat saat ada PDF di
-	// halaman). Klik thumbnail → tetap buka PDF viewer (handler di pemakai).
-	// Fallback: ikon "PDF" jika gagal dimuat.
+	// biasanya A4). Urutan: thumb R2 (belasan KB, tercepat) → render di perangkat
+	// (fallback, tajam 900px) → ikon "PDF" (gagal total). Klik thumbnail → tetap
+	// buka PDF viewer (handler di pemakai). Render memakai lib/thumb.ts bersama.
 	import { onMount } from 'svelte';
+	import {
+		proxyUrl,
+		renderPdfCanvas,
+		backfillThumbFromCanvas
+	} from '$lib/thumb';
 
-	let { url, class: className = '' }: { url: string; class?: string } = $props();
+	let {
+		url,
+		thumb = null,
+		backfill = false,
+		class: className = ''
+	}: { url: string; thumb?: string | null; backfill?: boolean; class?: string } = $props();
 
 	let imgUrl = $state<string | null>(null);
 	let failed = $state(false);
+	let thumbFailed = $state(false);
 
 	onMount(async () => {
+		// Thumb R2 dicoba dulu via <img> (di template). Bila tidak ada thumb
+		// yang diketahui, langsung render di perangkat.
+		if (!thumb) await render();
+	});
+
+	async function render() {
 		try {
-			const mod = await import('pdfjs-dist');
-			// $lib/pdfWorkerShim?worker&url: Vite mem-BUNDLE & TRANSPILE worker
-			// (target safari15) + menyuntikkan polyfill Promise.withResolvers ke
-			// KONTEKS WORKER (polyfill main thread tidak menjangkau worker —
-			// terbukti dari /diag di iPhone: 'Promise.withResolvers is not a
-			// function' di dalam worker).
-			const worker = await import('$lib/pdfWorkerShim?worker&url');
-			mod.GlobalWorkerOptions.workerSrc = worker.default;
+			// 900px untuk TAMPILAN (downscale → tajam, perilaku lama dipertahankan)
+			const canvas = await renderPdfCanvas(url, 900);
+			if (!canvas) throw new Error('render gagal');
+			let fmt = 'image/jpeg';
 			try {
-				await renderThumb(url, mod);
-			} catch (e) {
-				// iOS Safari 15.x: module worker bisa gagal → coba lagi dengan
-				// 'fake worker' (render di main thread). workerSrc TETAP di-set
-				// (tanpa itu pdfjs error 'No GlobalWorkerOptions.workerSrc').
-				// Worker disembunyikan sementara & dipulihkan setelah selesai
-				// agar EmbedPDF viewer tetap normal.
-				const isIOS =
-					/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-					(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-				if (!isIOS) throw e;
-				const savedWorker = (window as any).Worker;
-				(window as any).Worker = undefined;
-				try {
-					await renderThumb(url, mod);
-				} finally {
-					(window as any).Worker = savedWorker;
-				}
+				if (canvas.toDataURL('image/webp', 1).startsWith('data:image/webp')) fmt = 'image/webp';
+			} catch {
+				fmt = 'image/jpeg';
 			}
+			imgUrl = canvas.toDataURL(fmt, 0.85);
+			// Backfill diam-diam: simpan thumb 600px ke R2 agar pengunjung
+			// berikutnya langsung dapat file kecil (hanya saat admin melihat).
+			if (backfill && thumb) void backfillThumbFromCanvas(url, canvas);
 		} catch {
 			failed = true;
 		}
-	});
+	}
 
-	async function renderThumb(u: string, pdfjs: typeof import('pdfjs-dist')) {
-		if (!pdfjs) return;
-		const task = pdfjs.getDocument({ url: u });
-		const doc = await task.promise;
-		const page = await doc.getPage(1);
-		// Render 900px CSS — ditampilkan hingga full-width konten (~800px) dengan
-		// downscale → TAJAM (sebelumnya 300px di-upscale → buram)
-		const targetW = 900;
-		const vp1 = page.getViewport({ scale: 1 });
-		const scale = targetW / vp1.width;
-		const vp = page.getViewport({ scale });
-		const canvas = document.createElement('canvas');
-		canvas.width = Math.floor(vp.width);
-		canvas.height = Math.floor(vp.height);
-		const ctx = canvas.getContext('2d');
-		if (!ctx) throw new Error('canvas 2d tidak tersedia');
-		// pdfjs v4: render menerima canvasContext
-		await page.render({ canvasContext: ctx, viewport: vp }).promise;
-		// PENTING iOS: Safari TIDAK mendukung encoding WebP di canvas
-		// (toDataURL('image/webp') bisa gagal/error di iPhone) → deteksi dukungan
-		// sekali, fallback ke JPEG (didukung semua browser, ukuran juga ringan)
-		let fmt = 'image/jpeg';
-		try {
-			if (canvas.toDataURL('image/webp', 1).startsWith('data:image/webp')) fmt = 'image/webp';
-		} catch {
-			fmt = 'image/jpeg';
-		}
-		imgUrl = canvas.toDataURL(fmt, 0.85);
-		await task.destroy();
+	function onThumbError() {
+		thumbFailed = true;
+		void render();
 	}
 </script>
 
-{#if imgUrl}
+{#if thumb && !thumbFailed}
+	<img src={proxyUrl(thumb)} alt="Pratinjau PDF" class={className} loading="lazy" onerror={onThumbError} />
+{:else if imgUrl}
 	<img src={imgUrl} alt="Pratinjau PDF" class={className} loading="lazy" />
 {:else if failed}
 	<div class="pdf-icon">PDF</div>

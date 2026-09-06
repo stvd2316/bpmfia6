@@ -31,7 +31,11 @@ export async function POST({ request }) {
 				return json({ error: `Ukuran file ${file.name} melebihi 2MB` });
 			}
 
-			const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+			// Nama thumb deterministik (<basename>-thumb.webp): dipertahankan apa adanya
+		// (tanpa prefix tanggal) agar URL thumb bisa diturunkan dari URL file asli.
+		// Upload ulang nama yang sama menimpa (idempotent — aman untuk backfill).
+		const rawName = file.name.replace(/\s+/g, '_');
+		const fileName = rawName.endsWith('-thumb.webp') ? rawName : `${Date.now()}-${rawName}`;
 			const arrayBuffer = await file.arrayBuffer();
 
 			await r2.send(
