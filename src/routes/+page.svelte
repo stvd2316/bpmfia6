@@ -569,9 +569,34 @@
 		window.history.back();
 	};
 
+	// Kembalikan tampilan detail peraturan (dipakai tombol back/forward browser).
+	// Cari dulu di cache (beranda + halaman list); kalau tidak ada (deep-link /
+	// refresh) ambil langsung 1 baris dari database.
+	const restorePeraturanDetail = async (id: string) => {
+		const setDetail = (item: any) => {
+			selectedPeraturan = item;
+			showAllPeraturan = false;
+			showAboutUs = false;
+			showStatusIkm = false;
+			showAllBerita = false;
+			selectedBerita = null;
+		};
+		const cached = [...homePeraturan, ...Object.values(cachedPages).flat()].find((b) => b.id === id);
+		if (cached) {
+			setDetail(cached);
+			return;
+		}
+		try {
+			const { data } = await supabase.from('peraturan').select('*').eq('id', id).single();
+			if (data) setDetail(data);
+		} catch {
+			/* biarkan tampilan saat ini bila gagal dimuat */
+		}
+	};
+
 	// useEffect [homeBerita, cachedBeritaPages] — handler popstate
 	$effect(() => {
-		const handlePopState = (e: PopStateEvent) => {
+		const handlePopState = async (e: PopStateEvent) => {
 			const state = e.state;
 			if (!state) return;
 			if (state.page === 'all_peraturan') {
@@ -588,6 +613,9 @@
 				showStatusIkm = false;
 				showAllPeraturan = false;
 				selectedPeraturan = null;
+			} else if (state.page === 'detail' && state.id) {
+				await restorePeraturanDetail(state.id);
+				setTimeout(() => window.scrollTo(0, 0), 10);
 			} else if (state.page === 'berita_detail' && state.id) {
 				const item = [...homeBerita, ...Object.values(cachedBeritaPages).flat()].find(
 					(b) => b.id === state.id
