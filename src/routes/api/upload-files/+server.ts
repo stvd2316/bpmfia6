@@ -34,8 +34,12 @@ export async function POST({ request }) {
 			// Nama thumb deterministik (<basename>-thumb.webp): dipertahankan apa adanya
 		// (tanpa prefix tanggal) agar URL thumb bisa diturunkan dari URL file asli.
 		// Upload ulang nama yang sama menimpa (idempotent — aman untuk backfill).
-		const rawName = file.name.replace(/\s+/g, '_');
-		const fileName = rawName.endsWith('-thumb.webp') ? rawName : `${Date.now()}-${rawName}`;
+		// Pengaman: sanitasi pemisah path + HANYA nama berpola hasil generate
+		// (<timestamp>-<nama>-thumb.webp) yang dipertahankan — file asli user yang
+		// kebetulan bernama *-thumb.webp tetap diberi prefix tanggal agar tidak
+		// menimpa thumb milik file lain.
+		const rawName = file.name.replace(/[/\\]+/g, '_').replace(/\s+/g, '_');
+		const fileName = /^\d+-.+-thumb\.webp$/.test(rawName) ? rawName : `${Date.now()}-${rawName}`;
 			const arrayBuffer = await file.arrayBuffer();
 
 			await r2.send(

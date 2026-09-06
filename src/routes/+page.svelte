@@ -29,6 +29,9 @@
 	let editingIkmId = $state<any>(null);
 	let editingNilai = $state('');
 	let updatingIkm = $state(false);
+	// Nomor urut query IKM: respons yang pulang belakangan dari query yang lebih
+	// lama (basi) diabaikan agar hasil di layar selalu milik ketikan terakhir.
+	let ikmReqId = 0;
 
 	// Admin
 	let isAdmin = $state(false);
@@ -411,11 +414,15 @@
 		}
 		loadingIkm = true;
 		errorIkm = null;
+		const myReq = ++ikmReqId;
 		const delayDebounceFn = setTimeout(async () => {
 			const { data, error } = await supabase
 				.from('status_ikm_fia_ui')
 				.select('*')
 				.ilike('Nama Lengkap', `%${searchTerm}%`);
+			// Abaikan respons basi (pengguna sudah mengetik lanjutan & query baru
+			// sudah dikirim) — tanpa ini hasil ketikan lama bisa menimpa yang baru.
+			if (myReq !== ikmReqId) return;
 			if (error) {
 				errorIkm = error.message;
 				ikmData = [];
@@ -715,21 +722,28 @@
 	const ADMIN_LIVE_COOKIE = 'bpm_admin_live=1; path=/; SameSite=Lax';
 	const KALIMAT_HAPUS = 'saya akan menghapus email berikut sebagai admin dan saya sudah memahaminya';
 
-	const fetchAdminList = async (): Promise<string[]> => {
+	const fetchAdminList = async (): Promise<string[]> => (await tryFetchAdminList()) ?? [];
+
+	// Versi ketat: gagal jaringan → null (bukan []) agar pemanggil bisa
+	// membedakan "memang bukan admin" vs "jaringan gagal".
+	const tryFetchAdminList = async (): Promise<string[] | null> => {
 		try {
 			const res = await fetch('/api/admin-emails');
-			if (!res.ok) return [];
+			if (!res.ok) return null;
 			const data = await res.json();
 			return (data.emails || []).map((e: string) => e.toLowerCase());
 		} catch {
-			return [];
+			return null;
 		}
 	};
 
 	const checkAdminSession = async () => {
 		try {
 			const { data } = await authClient.getSession();
-			const list = await fetchAdminList();
+			const list = await tryFetchAdminList();
+			// Jaringan gagal → JANGAN ubah status UI (sebelumnya admin yang sah
+			// ditendang keluar hanya karena fetch sesaat gagal).
+			if (list === null) return;
 			adminList = list;
 			const hasSession = !!(data?.session && data?.user);
 			const isListed = list.includes((data?.user?.email || '').toLowerCase());
@@ -745,7 +759,8 @@
 				isAdmin = false;
 			}
 		} catch {
-			isAdmin = false;
+			// getSession gagal (jaringan) → pertahankan status UI; aksi tulis/hapus
+			// tetap dijaga fail-closed oleh requireAdminSession.
 		}
 	};
 
@@ -757,7 +772,8 @@
 	const requireAdminSession = async (): Promise<'ok' | 'expired' | 'error'> => {
 		try {
 			const { data } = await authClient.getSession();
-			const list = await fetchAdminList();
+			const list = await tryFetchAdminList();
+			if (list === null) return 'error';
 			const ok =
 				!!(data?.session && data?.user) &&
 				list.includes((data?.user?.email || '').toLowerCase());
@@ -777,7 +793,11 @@
 	const handleAdminSendOtp = async (e: SubmitEvent) => {
 		e.preventDefault();
 		adminAuthError = '';
-		const list = await fetchAdminList();
+		const list = await tryFetchAdminList();
+		if (list === null) {
+			adminAuthError = 'Tidak dapat memverifikasi email. Periksa koneksi lalu coba lagi.';
+			return;
+		}
 		adminList = list;
 		if (!list.includes(adminEmail.toLowerCase().trim())) {
 			adminAuthError = 'Email tidak terdaftar sebagai admin.';
@@ -844,7 +864,12 @@
 			adminDashOpen = true;
 			adminDashMsg = '';
 			adminDashErr = '';
-			adminList = await fetchAdminList();
+			const dashList = await tryFetchAdminList();
+			if (dashList === null) {
+				adminDashErr = 'Tidak dapat memuat daftar admin. Periksa koneksi lalu tutup-buka lagi.';
+			} else {
+				adminList = dashList;
+			}
 			try {
 				const { data } = await authClient.getSession();
 				adminSessionEmail = data?.user?.email || null;
