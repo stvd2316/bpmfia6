@@ -40,6 +40,7 @@
 	let adminAuthError = $state('');
 	let adminBusy = $state(false);
 	let showLogoutConfirm = $state(false);
+	let showSessionExpired = $state(false);
 	// Dashboard admin: daftar email admin (tabel admin_emails)
 	let adminDashOpen = $state(false);
 	let adminList = $state<string[]>([]);
@@ -224,6 +225,23 @@
 		fetchAcara();
 		checkAdminSession();
 
+		// Re-verifikasi sesi tiap 60 detik: sesi 1 jam sebelumnya HANYA dicek saat
+		// halaman dimuat — tanpa ini, halaman yang dibiarkan terbuka tetap
+		// menampilkan mode admin walau sesi server sudah hangus (akibatnya: tulis
+		// DB jalan tapi hapus file R2 gagal diam-diam → file yatim).
+		const sessionTimer = window.setInterval(async () => {
+			if (!isAdmin) return;
+			try {
+				const { data } = await authClient.getSession();
+				if (!(data?.session && data?.user)) {
+					isAdmin = false;
+					showSessionExpired = true;
+				}
+			} catch {
+				/* abaikan — cek berikutnya 60 detik lagi */
+			}
+		}, 60000);
+
 		const channel = supabase
 			.channel('custom-all-channel')
 			.on(
@@ -267,6 +285,7 @@
 
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
+			window.clearInterval(sessionTimer);
 			supabase.removeChannel(channel);
 		};
 	});
@@ -730,6 +749,31 @@
 		}
 	};
 
+	// Penjaga aksi tulis/hapus: pastikan sesi server MASIH hidup (bukan hanya
+	// state UI). Mencegah skenario sesi hangus di tengah halaman terbuka:
+	// tulis DB (anon key) akan tetap jalan sementara operasi ber-sesi gagal.
+	// 'ok' = lanjut; 'expired' = sesi mati (UI di-logout + modal);
+	// 'error' = jaringan gagal (aksi dibatalkan, UI tidak diubah).
+	const requireAdminSession = async (): Promise<'ok' | 'expired' | 'error'> => {
+		try {
+			const { data } = await authClient.getSession();
+			const list = await fetchAdminList();
+			const ok =
+				!!(data?.session && data?.user) &&
+				list.includes((data?.user?.email || '').toLowerCase());
+			if (!ok) {
+				if (isAdmin) {
+					isAdmin = false;
+					showSessionExpired = true;
+				}
+				return 'expired';
+			}
+			return 'ok';
+		} catch {
+			return 'error';
+		}
+	};
+
 	const handleAdminSendOtp = async (e: SubmitEvent) => {
 		e.preventDefault();
 		adminAuthError = '';
@@ -942,6 +986,15 @@
 	};
 	const handleDelete = async (id: string) => {
 		if (window.confirm('Apakah Anda yakin ingin menghapus peraturan ini?')) {
+			const sessD0 = await requireAdminSession();
+			if (sessD0 !== 'ok') {
+				alert(
+					sessD0 === 'expired'
+						? 'Sesi admin telah berakhir. Silakan login kembali.'
+						: 'Tidak dapat memverifikasi sesi. Periksa koneksi lalu coba lagi.'
+				);
+				return;
+			}
 			const { data: row } = await supabase.from('peraturan').select('pdf_url').eq('id', id).single();
 			const { error } = await supabase.from('peraturan').delete().eq('id', id);
 			if (error) alert('Gagal hapus: ' + error.message);
@@ -991,6 +1044,15 @@
 		e.preventDefault();
 		formError = '';
 		uploadingPdf = true;
+		const sess0 = await requireAdminSession();
+		if (sess0 !== 'ok') {
+			uploadingPdf = false;
+			formError =
+				sess0 === 'expired'
+					? 'Sesi admin telah berakhir. Silakan login kembali.'
+					: 'Tidak dapat memverifikasi sesi. Periksa koneksi lalu coba lagi.';
+			return;
+		}
 		let finalPdfUrl = existingPdfUrl;
 		if (pdfFile) {
 			try {
@@ -1141,6 +1203,15 @@
 		e.preventDefault();
 		acaraFormError = '';
 		uploadingAcara = true;
+		const sess1 = await requireAdminSession();
+		if (sess1 !== 'ok') {
+			uploadingAcara = false;
+			acaraFormError =
+				sess1 === 'expired'
+					? 'Sesi admin telah berakhir. Silakan login kembali.'
+					: 'Tidak dapat memverifikasi sesi. Periksa koneksi lalu coba lagi.';
+			return;
+		}
 		let finalUrls = [...existingAcaraFiles];
 		if (acaraFiles.length > 0) {
 			if (finalUrls.length + acaraFiles.length > 10) {
@@ -1236,6 +1307,15 @@
 	};
 	const handleDeleteAcara = async (id: string) => {
 		if (window.confirm('Hapus acara?')) {
+			const sessD1 = await requireAdminSession();
+			if (sessD1 !== 'ok') {
+				alert(
+					sessD1 === 'expired'
+						? 'Sesi admin telah berakhir. Silakan login kembali.'
+						: 'Tidak dapat memverifikasi sesi. Periksa koneksi lalu coba lagi.'
+				);
+				return;
+			}
 			const { data: row } = await supabase.from('iss_events').select('file_urls').eq('id', id).single();
 			const { error } = await supabase.from('iss_events').delete().eq('id', id);
 			if (error) alert('Gagal: ' + error.message);
@@ -1290,6 +1370,15 @@
 		e.preventDefault();
 		beritaFormError = '';
 		uploadingBerita = true;
+		const sess2 = await requireAdminSession();
+		if (sess2 !== 'ok') {
+			uploadingBerita = false;
+			beritaFormError =
+				sess2 === 'expired'
+					? 'Sesi admin telah berakhir. Silakan login kembali.'
+					: 'Tidak dapat memverifikasi sesi. Periksa koneksi lalu coba lagi.';
+			return;
+		}
 		let finalUrls = [...existingBeritaFiles];
 		if (beritaFiles.length > 0) {
 			if (finalUrls.length + beritaFiles.length > 10) {
@@ -1348,6 +1437,15 @@
 	};
 	const handleDeleteBerita = async (id: string) => {
 		if (window.confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
+			const sessD2 = await requireAdminSession();
+			if (sessD2 !== 'ok') {
+				alert(
+					sessD2 === 'expired'
+						? 'Sesi admin telah berakhir. Silakan login kembali.'
+						: 'Tidak dapat memverifikasi sesi. Periksa koneksi lalu coba lagi.'
+				);
+				return;
+			}
 			const { data: row } = await supabase.from('berita').select('file_urls').eq('id', id).single();
 			const { error } = await supabase.from('berita').delete().eq('id', id);
 			if (error) alert('Gagal hapus: ' + error.message);
@@ -1431,6 +1529,17 @@
 			<h2 class="modal-title">Konfirmasi Logout</h2>
 			<p style="font-family: var(--font-body); color: var(--body); margin-bottom: 24px; line-height: 1.6;">Yakin ingin keluar dari mode Admin? Kamu akan diminta kode OTP lagi untuk masuk kembali.</p>
 			<div class="form-actions"><button type="button" class="btn-primary" style="flex: 1" onclick={confirmLogout}>Ya, Logout</button><button type="button" class="action-btn outline" style="flex: 1; justify-content: center; background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong)" onclick={() => (showLogoutConfirm = false)}>Batal</button></div>
+		</div>
+	</div>
+{/if}
+
+<!-- ============ SESI BERAKHIR ============ -->
+{#if showSessionExpired}
+	<div class="modal-overlay" onclick={() => (showSessionExpired = false)}>
+		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
+			<h2 class="modal-title">Sesi Berakhir</h2>
+			<p style="font-family: var(--font-body); color: var(--body); margin-bottom: 24px; line-height: 1.6;">Sesi admin telah berakhir (batas 1 jam tidak aktif). Silakan login kembali untuk melanjutkan.</p>
+			<div class="form-actions"><button type="button" class="btn-primary" style="flex: 1" onclick={() => { showSessionExpired = false; adminStep = 'email'; adminOtp = ''; adminAuthError = ''; showLogin = true; }}>Login Lagi</button><button type="button" class="action-btn outline" style="flex: 1; justify-content: center; background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong)" onclick={() => (showSessionExpired = false)}>Tutup</button></div>
 		</div>
 	</div>
 {/if}
