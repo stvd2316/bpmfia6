@@ -47,5 +47,10 @@ export const auth = betterAuth({
 			httpOnly: true
 		}
 	},
-	trustedOrigins: ['http://localhost:3000', 'https://bpmfia5.vercel.app']
+	trustedOrigins: [
+		'http://localhost:3000',
+		'https://bpmfia5.vercel.app',
+		'https://bpmfiaui.com',
+		'https://www.bpmfiaui.com'
+	]
 });
