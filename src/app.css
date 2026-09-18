@@ -177,8 +177,8 @@ body {
 /* ========================================= */
 /* SECTION & CARD — putih bersih, hover emas */
 /* ========================================= */
-.section { padding: 64px 5%; background: transparent; }
-.section-header { text-align: center; margin-bottom: 48px; }
+.section { padding: 40px 5%; background: transparent; }
+.section-header { text-align: center; margin-bottom: 32px; }
 .section-header h2 { font-family: var(--font-heading); font-size: 36px; font-weight: 700; color: var(--ink); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; position: relative; display: inline-block; }
 .section-header p { font-family: var(--font-body); color: var(--mute); font-size: 16px; max-width: 600px; margin: 0 auto; line-height: 1.5; }
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 100%; margin: 0 auto; }
