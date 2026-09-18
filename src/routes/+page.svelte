@@ -1839,9 +1839,8 @@
 {#if !showAllPeraturan && !selectedPeraturan && !showAboutUs && !showStatusIkm && !showAllBerita && !selectedBerita}
 	<section class="hero" id="beranda" style="background-image: url('/assets/gedungfia.webp'); background-color: var(--surface-dark)">
 		<div class="hero-content">
-			<div class="hero-badge">SELAMAT DATANG</div>
-			<h1>Badan Perwakilan Mahasiswa FIA UI</h1>
-			<p>Mewakili suara mahasiswa, menjunjung tinggi demokrasi, dan berkomitmen untuk menciptakan lingkungan kampus yang lebih baik.</p>
+			<h1 class="hero-welcome">Selamat Datang di Laman Resmi</h1>
+			<img src="/assets/bpmreform.webp" alt="Logo BPM FIA UI" class="hero-logo" />
 			<button type="button" onclick={goToAllPeraturan} class="btn-primary">Jelajahi Peraturan</button>
 		</div>
 	</section>
