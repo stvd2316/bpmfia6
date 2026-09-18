@@ -1727,7 +1727,7 @@
 			<form onsubmit={handleAcaraSave}>
 				<div class="form-group"><label class="form-label">Tanggal Acara</label><input type="date" class="form-input" required value={acaraFormData.date} oninput={(e) => (acaraFormData = { ...acaraFormData, date: val(e) })} /></div>
 				<div class="form-group"><label class="form-label">Nama Acara</label><input type="text" class="form-input" required placeholder="Masukkan nama acara" value={acaraFormData.acaraName} oninput={(e) => (acaraFormData = { ...acaraFormData, acaraName: val(e) })} /></div>
-				<div class="form-group"><label class="form-label">Berita Acara (Bisa isi link apapun)</label><textarea class="form-input" required rows={3} placeholder="Deskripsi singkat / berita acara" style="resize: vertical; font-family: var(--font-body)" value={acaraFormData.acaraNews} oninput={(e) => (acaraFormData = { ...acaraFormData, acaraNews: val(e) })}></textarea></div>
+				<div class="form-group"><label class="form-label">Berita Acara (Opsional — bisa isi link apapun)</label><textarea class="form-input" rows={3} placeholder="Deskripsi singkat / berita acara (boleh dikosongkan)" style="resize: vertical; font-family: var(--font-body)" value={acaraFormData.acaraNews} oninput={(e) => (acaraFormData = { ...acaraFormData, acaraNews: val(e) })}></textarea></div>
 				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
 					<div class="form-group"><label class="form-label">LTK Penyelenggara</label><input type="text" class="form-input" required placeholder="Misal: BPM FIA UI" value={acaraFormData.ltkPenyelenggara} oninput={(e) => (acaraFormData = { ...acaraFormData, ltkPenyelenggara: val(e) })} /></div>
 					<div class="form-group"><label class="form-label">Tempat</label><input type="text" class="form-input" required placeholder="Misal: Gedung M FIA UI" value={acaraFormData.tempat} oninput={(e) => (acaraFormData = { ...acaraFormData, tempat: val(e) })} /></div>
@@ -1750,7 +1750,7 @@
 						<label style="font-size: 14px; font-family: var(--font-body)">Selesai</label>
 					</div>
 				</div>
-				<div class="form-group"><label class="form-label">Penanggungjawab</label><input type="text" class="form-input" required placeholder="Nama penanggungjawab acara" value={acaraFormData.penanggungjawab} oninput={(e) => (acaraFormData = { ...acaraFormData, penanggungjawab: val(e) })} /></div>
+				<div class="form-group"><label class="form-label">Penanggungjawab (Opsional)</label><input type="text" class="form-input" placeholder="Nama penanggungjawab acara (boleh dikosongkan)" value={acaraFormData.penanggungjawab} oninput={(e) => (acaraFormData = { ...acaraFormData, penanggungjawab: val(e) })} /></div>
 				<div class="form-group">
 					<label class="form-label">Lampiran Gambar/PDF (Maks 10 file, 2MB/file)</label>
 					<div class="dropzone" onclick={() => document.getElementById('acara-files-input')?.click()}>
@@ -1904,12 +1904,12 @@
 						{#each selectedDateAcara as ev (ev.id)}
 							<div class="event-item">
 								<h4>{ev.title}</h4>
-								<p><TextWithLinks text={ev.description} /></p>
+								{#if ev.description}<p><TextWithLinks text={ev.description} /></p>{/if}
 								<div class="event-meta">
 									<div><strong>LTK Penyelenggara:</strong> {ev.ltkPenyelenggara}</div>
 									<div><strong>Tempat:</strong> {ev.tempat}</div>
 									<div><strong>Waktu:</strong> {ev.waktuMulai} - {ev.waktuSelesai === '' ? '-' : ev.waktuSelesai}</div>
-									<div><strong>Penanggungjawab:</strong> {ev.penanggungjawab}</div>
+									{#if ev.penanggungjawab !== '-'}<div><strong>Penanggungjawab:</strong> {ev.penanggungjawab}</div>{/if}
 								</div>
 								{#if ev.file_urls && ev.file_urls.length > 0}
 									<div class="event-files-grid">
