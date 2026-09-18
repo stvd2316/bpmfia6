@@ -1869,26 +1869,6 @@
 		<div class="btn-more-container"><button type="button" onclick={goToAllPeraturan} class="btn-primary">SELENGKAPNYA</button></div>
 	</section>
 
-	<section class="section" id="berita" style="background-color: var(--surface-soft)">
-		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
-			<div style="text-align: left"><h2>Berita</h2><p>Informasi dan kabar terkini</p></div>
-			{#if isAdmin}<button type="button" class="btn-admin-action" onclick={openAddBeritaForm} title="Tambah Berita">+</button>{/if}
-		</div>
-		<div class="cards-grid">
-			{#each homeBerita as item (item.id)}
-				<div class="card">
-					<div class="card-header"><span>Berita</span><span class="card-date">{formatTanggal(item.tgl_terbit)}</span></div>
-					<div class="card-body">
-						<h3 class="card-title">{item.judul}</h3>
-						<button type="button" class="btn-outline" onclick={() => viewBeritaDetail(item)}>Baca Selengkapnya</button>
-						{#if isAdmin}<div class="card-actions"><button type="button" class="btn-edit" onclick={() => openEditBeritaForm(item)}>Edit</button><button type="button" class="btn-delete" onclick={() => handleDeleteBerita(item.id)}>Hapus</button></div>{/if}
-					</div>
-				</div>
-			{/each}
-		</div>
-		<div class="btn-more-container"><button type="button" onclick={goToAllBerita} class="btn-primary">SELENGKAPNYA</button></div>
-	</section>
-
 	<section class="section" id="iss">
 		<div class="section-header"><h2>Integrated Scheduling System</h2><p>Jadwal kegiatan dan acara yang akan dilaksanakan oleh ORMAWA FIA UI</p></div>
 		<p class="fullview-guide" style="margin-top: -32px">Klik pada gambar/pdf untuk melihat dalam mode layar penuh</p>
@@ -1957,6 +1937,26 @@
 		</div>
 	</div>
 </section>
+
+	<section class="section" id="berita" style="background-color: var(--surface-soft)">
+		<div class="section-header" style="display: flex; justify-content: space-between; align-items: center">
+			<div style="text-align: left"><h2>Berita</h2><p>Informasi dan kabar terkini</p></div>
+			{#if isAdmin}<button type="button" class="btn-admin-action" onclick={openAddBeritaForm} title="Tambah Berita">+</button>{/if}
+		</div>
+		<div class="cards-grid">
+			{#each homeBerita as item (item.id)}
+				<div class="card">
+					<div class="card-header"><span>Berita</span><span class="card-date">{formatTanggal(item.tgl_terbit)}</span></div>
+					<div class="card-body">
+						<h3 class="card-title">{item.judul}</h3>
+						<button type="button" class="btn-outline" onclick={() => viewBeritaDetail(item)}>Baca Selengkapnya</button>
+						{#if isAdmin}<div class="card-actions"><button type="button" class="btn-edit" onclick={() => openEditBeritaForm(item)}>Edit</button><button type="button" class="btn-delete" onclick={() => handleDeleteBerita(item.id)}>Hapus</button></div>{/if}
+					</div>
+				</div>
+			{/each}
+		</div>
+		<div class="btn-more-container"><button type="button" onclick={goToAllBerita} class="btn-primary">SELENGKAPNYA</button></div>
+	</section>
 {:else if showAllBerita}
 	<div class="page-peraturan-container"><section class="section">
 		<button type="button" class="btn-back" onclick={goBack}>← Kembali ke Beranda</button>
