@@ -311,15 +311,15 @@
 			.from('peraturan')
 			.select('*')
 			.order('tgl_penetapan', { ascending: false })
-			.limit(5);
-		if (pData) homePeraturan = pData;
+			.limit(3);
+			if (pData) homePeraturan = pData;
 
 		const { data: bData } = await supabase
 			.from('berita')
 			.select('*')
 			.order('tgl_terbit', { ascending: false })
-			.limit(5);
-		if (bData) homeBerita = bData;
+			.limit(3);
+			if (bData) homeBerita = bData;
 	};
 
 	const fetchPage = async (pageNum: number, forceFetch = false) => {
