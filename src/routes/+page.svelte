@@ -210,14 +210,20 @@
 		fetchHomeData();
 
 		const fetchAcara = async () => {
-			const c = readCache('iss_events');
-			if (c) acaraData = (c.d || []).map(mapAcara);
-			if (c?.fresh) return;
 			const { data } = await supabase.from('iss_events').select('*');
-			if (data) {
-				writeCache('iss_events', data);
-				acaraData = data.map(mapAcara);
-			}
+			if (data)
+				acaraData = data.map((e: any) => ({
+					id: e.id,
+					dateKey: e.date_key,
+					title: e.title,
+					description: e.description,
+					ltkPenyelenggara: e.ltk_penyelenggara || '-',
+					tempat: e.tempat || '-',
+					waktuMulai: e.waktu_mulai || '',
+					waktuSelesai: e.waktu_selesai || '',
+					penanggungjawab: e.penanggungjawab || '-',
+					file_urls: e.file_urls || []
+				}));
 		};
 		fetchAcara();
 		checkAdminSession();
@@ -287,54 +293,9 @@
 		};
 	});
 
-	// ================= CACHE TAB-BERSAMA (localStorage, TTL 5 menit) =================
-	// localStorage dibagi semua tab dalam browser yang sama. Pola: tampilkan memo
-	// dulu (instan), lewati fetch bila memo masih segar; bila basi/tak ada, fetch
-	// di belakang lalu perbarui tampilan + memo. Fetch gagal (offline) = memo basi tetap tampil.
-	const CACHE_TTL = 5 * 60 * 1000;
-	const readCache = (key: string): { d: any; fresh: boolean } | null => {
-		try {
-			const raw = localStorage.getItem('jdh_' + key);
-			if (!raw) return null;
-			const o = JSON.parse(raw);
-			if (!o || typeof o.t !== 'number') return null;
-			return { d: o.d, fresh: Date.now() - o.t <= CACHE_TTL };
-		} catch {
-			return null;
-		}
-	};
-	const writeCache = (key: string, d: any) => {
-		try {
-			localStorage.setItem('jdh_' + key, JSON.stringify({ t: Date.now(), d }));
-		} catch {
-			/* penyimpanan penuh/mode privat: abaikan, web tetap jalan normal */
-		}
-	};
-	const mapAcara = (e: any) => ({
-		id: e.id,
-		dateKey: e.date_key,
-		title: e.title,
-		description: e.description,
-		ltkPenyelenggara: e.ltk_penyelenggara || '-',
-		tempat: e.tempat || '-',
-		waktuMulai: e.waktu_mulai || '',
-		waktuSelesai: e.waktu_selesai || '',
-		penanggungjawab: e.penanggungjawab || '-',
-		file_urls: e.file_urls || []
-	});
-
 	// ================= DATA FETCH =================
 
-	const fetchHomeData = async (force = false) => {
-		if (!force) {
-			const cS = readCache('stats');
-			if (cS) stats = cS.d;
-			const cP = readCache('peraturan_home');
-			if (cP) homePeraturan = cP.d;
-			const cB = readCache('berita_home');
-			if (cB) homeBerita = cB.d;
-			if (cS?.fresh && cP?.fresh && cB?.fresh) return;
-		}
+	const fetchHomeData = async () => {
 		const { count: total } = await supabase.from('peraturan').select('*', { count: 'exact', head: true });
 		const { count: berlaku } = await supabase
 			.from('peraturan')
@@ -345,27 +306,20 @@
 			.select('*', { count: 'exact', head: true })
 			.eq('status', 'Dicabut');
 		stats = { total: total || 0, berlaku: berlaku || 0, dicabut: dicabut || 0 };
-		writeCache('stats', stats);
 
 		const { data: pData } = await supabase
 			.from('peraturan')
 			.select('*')
 			.order('tgl_penetapan', { ascending: false })
 			.limit(3);
-		if (pData) {
-			homePeraturan = pData;
-			writeCache('peraturan_home', pData);
-		}
+			if (pData) homePeraturan = pData;
 
 		const { data: bData } = await supabase
 			.from('berita')
 			.select('*')
 			.order('tgl_terbit', { ascending: false })
 			.limit(3);
-		if (bData) {
-			homeBerita = bData;
-			writeCache('berita_home', bData);
-		}
+			if (bData) homeBerita = bData;
 	};
 
 	const fetchPage = async (pageNum: number, forceFetch = false) => {
@@ -1072,7 +1026,7 @@
 			else {
 				// Hapus file asli + thumb-nya dari R2 (best-effort, tidak menghambat UI)
 				void deleteFilesAndThumbs([row?.pdf_url]);
-				fetchHomeData(true);
+				fetchHomeData();
 				if (showAllPeraturan) {
 					cachedPages = {};
 					fetchPage(1, true);
@@ -1155,7 +1109,7 @@
 			else {
 				cleanupReplacedFiles([initialPdfUrl], [finalPdfUrl]);
 				showForm = false;
-				fetchHomeData(true);
+				fetchHomeData();
 				if (showAllPeraturan) {
 					cachedPages = {};
 					fetchPage(currentPage, true);
@@ -1167,7 +1121,7 @@
 			else {
 				cleanupReplacedFiles([initialPdfUrl], [finalPdfUrl]);
 				showForm = false;
-				fetchHomeData(true);
+				fetchHomeData();
 				if (showAllPeraturan) {
 					cachedPages = {};
 					fetchPage(1, true);
@@ -1485,7 +1439,7 @@
 			else {
 				cleanupReplacedFiles(initialBeritaFiles, finalUrls);
 				showBeritaForm = false;
-				fetchHomeData(true);
+				fetchHomeData();
 				if (showAllBerita) {
 					cachedBeritaPages = {};
 					fetchBeritaPage(currentBeritaPage, true);
@@ -1497,7 +1451,7 @@
 			else {
 				cleanupReplacedFiles(initialBeritaFiles, finalUrls);
 				showBeritaForm = false;
-				fetchHomeData(true);
+				fetchHomeData();
 				if (showAllBerita) {
 					cachedBeritaPages = {};
 					fetchBeritaPage(1, true);
@@ -1522,7 +1476,7 @@
 			if (error) alert('Gagal hapus: ' + error.message);
 			else {
 				void deleteFilesAndThumbs(row?.file_urls || []);
-				fetchHomeData(true);
+				fetchHomeData();
 				if (showAllBerita) {
 					cachedBeritaPages = {};
 					fetchBeritaPage(currentBeritaPage, true);
