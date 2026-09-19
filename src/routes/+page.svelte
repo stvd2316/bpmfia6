@@ -1752,7 +1752,7 @@
 				</div>
 				<div class="form-group"><label class="form-label">Penanggungjawab (Opsional)</label><input type="text" class="form-input" placeholder="DEPARTEMEN/DIVISI/KOMISI (boleh dikosongkan)" value={acaraFormData.penanggungjawab} oninput={(e) => (acaraFormData = { ...acaraFormData, penanggungjawab: val(e) })} /></div>
 				<div class="form-group">
-					<label class="form-label">Lampiran Gambar/PDF (Maks 10 file, 2MB/file)</label>
+					<label class="form-label">Lampiran Gambar/PDF (Opsional — maks 10 file, 2MB/file)</label>
 					<div class="dropzone" onclick={() => document.getElementById('acara-files-input')?.click()}>
 						<input id="acara-files-input" type="file" multiple accept="image/webp,application/pdf" style="display: none" onchange={handleAcaraFileInput} />
 						<p style="font-family: var(--font-body); font-size: 14px; color: var(--mute)">Klik untuk memilih file (WebP/PDF)</p>
