@@ -1750,7 +1750,7 @@
 						<label style="font-size: 14px; font-family: var(--font-body)">Selesai</label>
 					</div>
 				</div>
-				<div class="form-group"><label class="form-label">Penanggungjawab (Opsional)</label><input type="text" class="form-input" placeholder="Nama penanggungjawab acara (boleh dikosongkan)" value={acaraFormData.penanggungjawab} oninput={(e) => (acaraFormData = { ...acaraFormData, penanggungjawab: val(e) })} /></div>
+				<div class="form-group"><label class="form-label">Penanggungjawab (Opsional)</label><input type="text" class="form-input" placeholder="DEPARTEMEN/DIVISI/KOMISI (boleh dikosongkan)" value={acaraFormData.penanggungjawab} oninput={(e) => (acaraFormData = { ...acaraFormData, penanggungjawab: val(e) })} /></div>
 				<div class="form-group">
 					<label class="form-label">Lampiran Gambar/PDF (Maks 10 file, 2MB/file)</label>
 					<div class="dropzone" onclick={() => document.getElementById('acara-files-input')?.click()}>
