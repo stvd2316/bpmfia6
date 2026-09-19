@@ -243,7 +243,7 @@ body {
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .cal-weekday { text-align: center; font-family: var(--font-heading); font-size: 12px; font-weight: 700; color: var(--mute); padding: 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
 .cal-weekday.weekend { color: var(--ink); }
-.cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-family: var(--font-body); font-size: 14px; border-radius: var(--radius-sm); cursor: pointer; position: relative; transition: all 0.2s; border: 1px solid transparent; }
+.cal-day { aspect-ratio: 1 / 1.18; display: flex; align-items: center; justify-content: center; font-family: var(--font-body); font-size: 14px; border-radius: var(--radius-sm); cursor: pointer; position: relative; transition: all 0.2s; border: 1px solid transparent; }
 .cal-day.empty { cursor: default; border: none; }
 .cal-day:not(.empty):hover { background: var(--surface-soft); border-color: var(--hairline); }
 .cal-day.weekend { color: var(--ink); font-weight: 700; }
@@ -251,7 +251,7 @@ body {
 .cal-day.has-event { background: var(--gold-grad-strong); color: var(--ink); font-weight: 700; box-shadow: 0 4px 14px rgba(255, 209, 85, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.55); }
 .cal-day.has-event:hover { background: linear-gradient(135deg, var(--gold-2) 0%, var(--gold-3) 100%); }
 /* Bintik jumlah acara di bawah angka tanggal (hitam di atas emas, emas di atas selected) */
-.cal-dots { position: absolute; left: 0; right: 0; bottom: 3px; display: flex; justify-content: center; gap: 2px; pointer-events: none; }
+.cal-dots { position: absolute; left: 0; right: 0; bottom: 4px; display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 30px; margin: 0 auto; pointer-events: none; }
 .cal-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--ink); }
 .cal-day.selected .cal-dot { background: var(--gold-2); }
 .cal-day.selected { background: var(--obsidian-900) !important; color: var(--on-dark) !important; font-weight: 700; box-shadow: 0 4px 16px rgba(10, 10, 12, 0.35); }

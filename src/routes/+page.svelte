@@ -1893,7 +1893,7 @@
 						{@const dOW = dO.getDay()}
 						{@const iW = dOW === 0 || dOW === 6}
 						{@const cA = acaraData.filter((ev) => ev.dateKey === dK).length}
-						<div class="cal-day {iT ? 'today' : ''} {iS ? 'selected' : ''} {iW ? 'weekend' : ''} {hA ? 'has-event' : ''}" onclick={() => handleDateClick(dO)} role="button">{i + 1}{#if hA}<span class="cal-dots" aria-hidden="true">{#each Array.from({ length: Math.min(cA, 5) }) as _, k (k)}<span class="cal-dot"></span>{/each}</span>{/if}</div>
+						<div class="cal-day {iT ? 'today' : ''} {iS ? 'selected' : ''} {iW ? 'weekend' : ''} {hA ? 'has-event' : ''}" onclick={() => handleDateClick(dO)} role="button">{i + 1}{#if hA}<span class="cal-dots" aria-hidden="true">{#each Array.from({ length: Math.min(cA, 10) }) as _, k (k)}<span class="cal-dot"></span>{/each}</span>{/if}</div>
 					{/each}
 				{/if}
 			</div>
