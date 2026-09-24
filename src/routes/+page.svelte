@@ -1733,19 +1733,19 @@
 					<div class="form-group"><label class="form-label">Tempat</label><input type="text" class="form-input" required placeholder="Misal: Gedung M FIA UI" value={acaraFormData.tempat} oninput={(e) => (acaraFormData = { ...acaraFormData, tempat: val(e) })} /></div>
 				</div>
 				<div class="form-group">
-					<label class="form-label">Waktu Mulai (24 Jam)</label>
+					<label class="form-label">Waktu Mulai (24 Jam — Opsional)</label>
 					<div class="time-picker-group">
-						<select class="form-select" required value={mulaiH} onchange={(e) => (acaraFormData = { ...acaraFormData, waktuMulai: `${val(e)}:${mulaiM || '00'}` })}><option value="" disabled>Jam</option>{#each hoursList as h (h)}<option value={h}>{h}</option>{/each}</select>
+						<select class="form-select" value={mulaiH} onchange={(e) => (acaraFormData = { ...acaraFormData, waktuMulai: `${val(e)}:${mulaiM || '00'}` })}><option value="" disabled>Jam</option>{#each hoursList as h (h)}<option value={h}>{h}</option>{/each}</select>
 						<span class="time-separator">:</span>
-						<select class="form-select" required value={mulaiM} onchange={(e) => (acaraFormData = { ...acaraFormData, waktuMulai: `${mulaiH || '00'}:${val(e)}` })}><option value="" disabled>Min</option>{#each minutesList as m (m)}<option value={m}>{m}</option>{/each}</select>
+						<select class="form-select" value={mulaiM} onchange={(e) => (acaraFormData = { ...acaraFormData, waktuMulai: `${mulaiH || '00'}:${val(e)}` })}><option value="" disabled>Min</option>{#each minutesList as m (m)}<option value={m}>{m}</option>{/each}</select>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="form-label">Waktu Selesai (24 Jam)</label>
+					<label class="form-label">Waktu Selesai (24 Jam — Opsional)</label>
 					<div class="time-picker-group">
-						<select class="form-select" required={!isSelesaiChecked} disabled={isSelesaiChecked} value={selesaiH} onchange={(e) => (acaraFormData = { ...acaraFormData, waktuSelesai: `${val(e)}:${selesaiM || '00'}` })}><option value="" disabled>Jam</option>{#each hoursList as h (h)}<option value={h}>{h}</option>{/each}</select>
+						<select class="form-select" disabled={isSelesaiChecked} value={selesaiH} onchange={(e) => (acaraFormData = { ...acaraFormData, waktuSelesai: `${val(e)}:${selesaiM || '00'}` })}><option value="" disabled>Jam</option>{#each hoursList as h (h)}<option value={h}>{h}</option>{/each}</select>
 						<span class="time-separator">:</span>
-						<select class="form-select" required={!isSelesaiChecked} disabled={isSelesaiChecked} value={selesaiM} onchange={(e) => (acaraFormData = { ...acaraFormData, waktuSelesai: `${selesaiH || '00'}:${val(e)}` })}><option value="" disabled>Min</option>{#each minutesList as m (m)}<option value={m}>{m}</option>{/each}</select>
+						<select class="form-select" disabled={isSelesaiChecked} value={selesaiM} onchange={(e) => (acaraFormData = { ...acaraFormData, waktuSelesai: `${selesaiH || '00'}:${val(e)}` })}><option value="" disabled>Min</option>{#each minutesList as m (m)}<option value={m}>{m}</option>{/each}</select>
 						<input type="checkbox" checked={isSelesaiChecked} onchange={(e) => (acaraFormData = { ...acaraFormData, waktuSelesai: checkedVal(e) ? 'SELESAI' : '' })} />
 						<label style="font-size: 14px; font-family: var(--font-body)">Selesai</label>
 					</div>
@@ -1909,7 +1909,7 @@
 								<div class="event-meta">
 									<div><strong>LTK Penyelenggara:</strong> {ev.ltkPenyelenggara}</div>
 									<div><strong>Tempat:</strong> {ev.tempat}</div>
-									<div><strong>Waktu:</strong> {ev.waktuMulai} - {ev.waktuSelesai === '' ? '-' : ev.waktuSelesai}</div>
+									{#if ev.waktuMulai || ev.waktuSelesai}<div><strong>Waktu:</strong> {ev.waktuMulai || '-'} - {ev.waktuSelesai || '-'}</div>{/if}
 									{#if ev.penanggungjawab !== '-'}<div><strong>Penanggungjawab:</strong> {ev.penanggungjawab}</div>{/if}
 								</div>
 								{#if ev.file_urls && ev.file_urls.length > 0}
