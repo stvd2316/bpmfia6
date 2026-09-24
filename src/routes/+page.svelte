@@ -1730,7 +1730,7 @@
 				<div class="form-group"><label class="form-label">Berita Acara (Opsional — bisa isi link apapun)</label><textarea class="form-input" rows={3} placeholder="Deskripsi singkat / berita acara (boleh dikosongkan)" style="resize: vertical; font-family: var(--font-body)" value={acaraFormData.acaraNews} oninput={(e) => (acaraFormData = { ...acaraFormData, acaraNews: val(e) })}></textarea></div>
 				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
 					<div class="form-group"><label class="form-label">LTK Penyelenggara</label><input type="text" class="form-input" required placeholder="Misal: BPM FIA UI" value={acaraFormData.ltkPenyelenggara} oninput={(e) => (acaraFormData = { ...acaraFormData, ltkPenyelenggara: val(e) })} /></div>
-					<div class="form-group"><label class="form-label">Tempat</label><input type="text" class="form-input" required placeholder="Misal: Gedung M FIA UI" value={acaraFormData.tempat} oninput={(e) => (acaraFormData = { ...acaraFormData, tempat: val(e) })} /></div>
+					<div class="form-group"><label class="form-label">Tempat (Opsional)</label><input type="text" class="form-input" placeholder="Misal: Gedung M FIA UI (boleh dikosongkan)" value={acaraFormData.tempat} oninput={(e) => (acaraFormData = { ...acaraFormData, tempat: val(e) })} /></div>
 				</div>
 				<div class="form-group">
 					<label class="form-label">Waktu Mulai (24 Jam — Opsional)</label>
@@ -1908,7 +1908,7 @@
 								{#if ev.description}<p><TextWithLinks text={ev.description} /></p>{/if}
 								<div class="event-meta">
 									<div><strong>LTK Penyelenggara:</strong> {ev.ltkPenyelenggara}</div>
-									<div><strong>Tempat:</strong> {ev.tempat}</div>
+									{#if ev.tempat !== '-'}<div><strong>Tempat:</strong> {ev.tempat}</div>{/if}
 									{#if ev.waktuMulai || ev.waktuSelesai}<div><strong>Waktu:</strong> {ev.waktuMulai || '-'} - {ev.waktuSelesai || '-'}</div>{/if}
 									{#if ev.penanggungjawab !== '-'}<div><strong>Penanggungjawab:</strong> {ev.penanggungjawab}</div>{/if}
 								</div>
